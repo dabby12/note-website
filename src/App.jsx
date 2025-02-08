@@ -8,6 +8,7 @@ import Conditions from "./components/TermsAndConditions/Conditions";
 import Images from "./components/Images";
 import NotFound from "./components/NotFound";
 import NewNote from "./components/NewNote";
+
 function App() {
   return (
     <Router>

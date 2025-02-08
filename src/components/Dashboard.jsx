@@ -5,9 +5,20 @@ import { MdEdit } from "react-icons/md";
 import { FaPen, FaRegCircle } from "react-icons/fa6";
 import { IoIosCheckmarkCircle } from "react-icons/io";
 import { ToastContainer, toast } from 'react-toastify';
-
+import { Query } from "appwrite";
 const DATABASE_ID = "679a016a0007d89e8356";  // Replace with your actual Database ID
 const COLLECTION_ID = "679a016f0005a850c549";  // Replace with your actual Collection ID
+
+const GetUserData = async () => {
+  try {
+    const userData = await account.get();
+    console.log(userData)
+    return userData;
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    return null;
+  }
+};
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
@@ -18,29 +29,40 @@ const Dashboard = () => {
   useEffect(() => {
     const checkUser = async () => {
       try {
-        const userData = await account.get();
+        const userData = await GetUserData();
         setUser(userData);
-        toast.success("Welcome, " + userData.name); // Show toast notification after setting user
+        if (!localStorage.getItem('loggedIn')) {
+          toast.success("Welcome, " + userData.name); // Show toast notification after setting user
+          localStorage.setItem('loggedIn', 'true');
+        }
       } catch (error) {
         navigate("/"); // Redirect to login if not logged in
       }
     };
 
+    checkUser();
+  }, [navigate]);
+
+  useEffect(() => {
     const fetchDocuments = async () => {
       try {
-        const response = await databases.listDocuments(DATABASE_ID, COLLECTION_ID);
+        const response = await databases.listDocuments(DATABASE_ID, COLLECTION_ID, [
+          Query.equal("userID", [user.$id]), // Fetch documents by user ID
+        ]);
         setDocuments(response.documents);
       } catch (error) {
         console.error("Error fetching documents:", error);
       }
     };
 
-    checkUser();
-    fetchDocuments();
-  }, [navigate]);
+    if (user) {
+      fetchDocuments();
+    }
+  }, [user]);
 
   const handleLogout = async () => {
     await account.deleteSession("current");
+    localStorage.removeItem('loggedIn');
     navigate("/"); // Redirect to login after logout
   };
 
@@ -93,6 +115,20 @@ const Dashboard = () => {
     location.reload();
   };
 
+  const renderContent = (content) => {
+    if (typeof content === 'string') {
+      try {
+        const parsedContent = JSON.parse(content);
+        return parsedContent.map((block, index) => (
+          <p key={index}>{block.children[0].text}</p>
+        ));
+      } catch (error) {
+        return <p>{content}</p>;
+      }
+    }
+    return <p>{content}</p>;
+  };
+
   return (
     <div className="flex flex-col items-center h-screen">
       <button 
@@ -127,9 +163,10 @@ const Dashboard = () => {
                 <div className="bg-white h-64 rounded-lg text-black border border-gray-300 overflow-hidden">
                   <li className="p-2 border-b m-2 font-bold">{doc.Name}</li>
                   <li className="p-2 border-b rounded-md">{doc.Description}</li>
-                  <li className="p-2 border-b">{doc.Content}</li>
+                  <li className="p-2 border-b">{renderContent(doc.Content)}</li>
                   <li className="p-2 border-b">{formatDate(doc.Date)}</li>
                   <li className="p-2 border-b">{doc.$id}</li>
+                  
 
                   <button 
                     className="p-2 border-t flex items-center justify-center w-full bg-blue-500 text-white hover:bg-blue-600 transition duration-300 rounded-b-lg"
@@ -170,6 +207,7 @@ const Dashboard = () => {
 
       <ToastContainer />
     </div>
+   
   );
 };
 

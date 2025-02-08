@@ -1,5 +1,5 @@
-import React, { useState, useCallback } from 'react';
-import { databases } from '../api/appwrite.cjs';
+import React, { useState, useCallback, useEffect } from 'react';
+import { databases, account } from '../api/appwrite.cjs';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom';
@@ -7,6 +7,17 @@ import { Editable, withReact, Slate, useSlate } from 'slate-react';
 import { Editor, Transforms, createEditor, Element as SlateElement } from 'slate';
 import { withHistory } from 'slate-history';
 import { Bold, Italic, Underline, Strikethrough } from 'lucide-react';
+
+const GetUserData = async () => {
+    try {
+        const userData = await account.get();
+        console.log(userData);
+        return userData;
+    } catch (error) {
+        console.error("Error fetching user data:", error);
+        return null;
+    }
+};
 
 const HOTKEYS = {
     'mod+b': 'bold',
@@ -48,6 +59,7 @@ const NewNote = () => {
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
     const [date, setDate] = useState('');
+    const [userID, setUserID] = useState(null);
     const notifyError = () => toast.error('Error creating note');
     const notify = () => toast.success('Note created successfully');
     const navigate = useNavigate();
@@ -56,9 +68,19 @@ const NewNote = () => {
     const initialValue = [
         {
             type: 'paragraph',
-            children: [{ text: 'Start typing...' }],
+            children: [{ text: '' }],
         },
     ];
+
+    useEffect(() => {
+        const fetchUserData = async () => {
+            const userData = await GetUserData();
+            if (userData) {
+                setUserID(userData.$id);
+            }
+        };
+        fetchUserData();
+    }, []);
 
     const renderLeaf = useCallback(({ attributes, children, leaf }) => {
         if (leaf.bold) children = <strong>{children}</strong>;
@@ -79,7 +101,8 @@ const NewNote = () => {
                     Name: name,
                     Description: description,
                     Content: JSON.stringify(editor.children),
-                    Date: date
+                    Date: date,
+                    userID: userID
                 },
                 ["read(\"any\")"]
             );
