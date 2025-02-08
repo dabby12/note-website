@@ -1,31 +1,8 @@
 // src/components/EditScreen.jsx
-// file to edit notes --> done
-// only redirect after user has click on note --> done
-// add a delete button --> done
-// add a save button --> done
-// add a cancel button --> done
-// add a text area for editing --> done
-// add a title input for editing --> done
-// add a date input for editing --> done
-// add a description input for editing --> done
-// add a back button --> done 
-// add a logout button --> done
-// add a loading spinner
-// add a error message --> done
-// add a success message --> done
-// add a warning message --> done
-// add a info message --> done
-// add a toast notification
-// add a modal dialog
-// add a tooltip
-// add a popover
-// add a progress bar
-// add a skeleton
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { account, databases } from '../api/appwrite.cjs';
 import { MdSave, MdDelete, MdCancel } from 'react-icons/md';
-import { Editor } from '@tinymce/tinymce-react';
 const DATABASE_ID = "679a016a0007d89e8356";  // Replace with your actual Database ID
 const COLLECTION_ID = "679a016f0005a850c549";  // Replace with your actual Collection ID
 
@@ -120,23 +97,11 @@ function EditScreen() {
             className="w-full p-2 mb-4 border rounded"
             placeholder="Description"
           />
-          <Editor
-            apiKey='dlzo6iegu8cgkvapmn33rncy0cuecdzjhcm8npsr50h9pweo'
+          <textarea
             value={note.Content}
-            init={{
-              height: 500,
-              menubar: false,
-              plugins: [
-                'advlist autolink lists link image charmap print preview anchor',
-                'searchreplace visualblocks code fullscreen',
-                'insertdatetime media table paste code help wordcount'
-              ],
-              toolbar:
-                'undo redo | formatselect | bold italic backcolor | \
-                alignleft aligncenter alignright alignjustify | \
-                bullist numlist outdent indent | removeformat | help'
-            }}
-            onEditorChange={(content) => setNote({ ...note, Content: content })}
+            onChange={(e) => setNote({ ...note, Content: e.target.value })}
+            className="w-full p-2 mb-4 border rounded"
+            placeholder="Content"
           />
           <input
             type="date"

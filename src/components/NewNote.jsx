@@ -1,39 +1,87 @@
-//to do list
-// add markdowns using mdx
-
-
-
-
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { databases } from '../api/appwrite.cjs';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom';
-import { Editor } from '@tinymce/tinymce-react';
+import { Editable, withReact, Slate, useSlate } from 'slate-react';
+import { Editor, Transforms, createEditor, Element as SlateElement } from 'slate';
+import { withHistory } from 'slate-history';
+import { Bold, Italic, Underline, Strikethrough } from 'lucide-react';
 
-function NewNote() {
+const HOTKEYS = {
+    'mod+b': 'bold',
+    'mod+i': 'italic',
+    'mod+u': 'underline',
+    'mod+shift+x': 'strikethrough'
+};
+
+const toggleMark = (editor, format) => {
+    const isActive = isMarkActive(editor, format);
+    if (isActive) {
+        Editor.removeMark(editor, format);
+    } else {
+        Editor.addMark(editor, format, true);
+    }
+};
+
+const isMarkActive = (editor, format) => {
+    const marks = Editor.marks(editor);
+    return marks ? marks[format] === true : false;
+};
+
+const MarkButton = ({ format, icon: Icon }) => {
+    const editor = useSlate();
+    return (
+        <button
+            onMouseDown={(event) => {
+                event.preventDefault();
+                toggleMark(editor, format);
+            }}
+            className="p-2 border rounded hover:bg-gray-200"
+        >
+            <Icon size={18} />
+        </button>
+    );
+};
+
+const NewNote = () => {
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
-    const [content, setContent] = useState('');
     const [date, setDate] = useState('');
     const notifyError = () => toast.error('Error creating note');
     const notify = () => toast.success('Note created successfully');
     const navigate = useNavigate();
 
+    const [editor] = useState(() => withHistory(withReact(createEditor())));
+    const initialValue = [
+        {
+            type: 'paragraph',
+            children: [{ text: 'Start typing...' }],
+        },
+    ];
+
+    const renderLeaf = useCallback(({ attributes, children, leaf }) => {
+        if (leaf.bold) children = <strong>{children}</strong>;
+        if (leaf.italic) children = <em>{children}</em>;
+        if (leaf.underline) children = <u>{children}</u>;
+        if (leaf.strikethrough) children = <s>{children}</s>;
+        return <span {...attributes}>{children}</span>;
+    }, []);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
             const result = await databases.createDocument(
-                '679a016a0007d89e8356', // databaseId
-                '679a016f0005a850c549', // collectionId
-                'unique()', // documentId
+                '679a016a0007d89e8356',
+                '679a016f0005a850c549',
+                'unique()',
                 {
                     Name: name,
                     Description: description,
-                    Content: content,
+                    Content: JSON.stringify(editor.children),
                     Date: date
-                }, // data
-                ["read(\"any\")"] // permissions (optional)
+                },
+                ["read(\"any\")"]
             );
             console.log('New Note:', result);
             notify();
@@ -46,8 +94,13 @@ function NewNote() {
         }
         setName('');
         setDescription('');
-        setContent('');
         setDate('');
+        Transforms.delete(editor, {
+            at: {
+                anchor: Editor.start(editor, []),
+                focus: Editor.end(editor, []),
+            },
+        });
     };
 
     return (
@@ -72,27 +125,26 @@ function NewNote() {
                         className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring focus:border-blue-300"
                     />
                 </div>
+
                 <div className="mb-4">
                     <label className="block text-gray-700">Content:</label>
-                    <Editor
-                        apiKey="your-tinymce-api-key"
-                        value={content}
-                        onEditorChange={(newContent) => setContent(newContent)}
-                        init={{
-                            height: 500,
-                            menubar: false,
-                            plugins: [
-                                'advlist autolink lists link image charmap print preview anchor',
-                                'searchreplace visualblocks code fullscreen',
-                                'insertdatetime media table paste code help wordcount'
-                            ],
-                            toolbar:
-                                'undo redo | formatselect | bold italic backcolor | \
-                                alignleft aligncenter alignright alignjustify | \
-                                bullist numlist outdent indent | removeformat | help'
-                        }}
-                    />
+                    <div className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring focus:border-blue-300">
+                        <Slate editor={editor} initialValue={initialValue}>
+                            <div className="flex space-x-2 mb-2">
+                                <MarkButton format="bold" icon={Bold} />
+                                <MarkButton format="italic" icon={Italic} />
+                                <MarkButton format="underline" icon={Underline} />
+                                <MarkButton format="strikethrough" icon={Strikethrough} />
+                            </div>
+                            <Editable
+                                className="min-h-[200px]"
+                                placeholder="Start typing..."
+                                renderLeaf={renderLeaf}
+                            />
+                        </Slate>
+                    </div>
                 </div>
+
                 <div className="mb-4">
                     <label className="block text-gray-700">Date:</label>
                     <input
@@ -114,6 +166,6 @@ function NewNote() {
             <ToastContainer />
         </div>
     );
-}
+};
 
 export default NewNote;
