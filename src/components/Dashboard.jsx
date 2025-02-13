@@ -6,9 +6,12 @@ import { FaPen, FaRegCircle } from "react-icons/fa6";
 import { IoIosCheckmarkCircle } from "react-icons/io";
 import { ToastContainer, toast } from 'react-toastify';
 import { Query } from "appwrite";
+import { IoSettings } from "react-icons/io5";
+import Settings from "./Settings"
 const DATABASE_ID = "679a016a0007d89e8356";  // Replace with your actual Database ID
 const COLLECTION_ID = "679a016f0005a850c549";  // Replace with your actual Collection ID
 
+// Function to get user data
 const GetUserData = async () => {
   try {
     const userData = await account.get();
@@ -21,11 +24,12 @@ const GetUserData = async () => {
 };
 
 const Dashboard = () => {
-  const [user, setUser] = useState(null);
-  const [documents, setDocuments] = useState([]);
-  const [selectedDocuments, setSelectedDocuments] = useState([]);
-  const navigate = useNavigate();
+  const [user, setUser] = useState(null); // State to store user data
+  const [documents, setDocuments] = useState([]); // State to store documents
+  const [selectedDocuments, setSelectedDocuments] = useState([]); // State to store selected documents
+  const navigate = useNavigate(); // Hook to navigate between routes
 
+  // Effect to check user authentication
   useEffect(() => {
     const checkUser = async () => {
       try {
@@ -43,6 +47,7 @@ const Dashboard = () => {
     checkUser();
   }, [navigate]);
 
+  // Effect to fetch documents for the authenticated user
   useEffect(() => {
     const fetchDocuments = async () => {
       try {
@@ -60,17 +65,20 @@ const Dashboard = () => {
     }
   }, [user]);
 
+  // Function to handle user logout
   const handleLogout = async () => {
     await account.deleteSession("current");
     localStorage.removeItem('loggedIn');
     navigate("/"); // Redirect to login after logout
   };
 
+  // Function to format date
   const formatDate = (dateString) => {
     const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
+  // Function to handle document selection
   const handleSelectDocument = (docId) => {
     setSelectedDocuments((prevSelected) =>
       prevSelected.includes(docId)
@@ -78,7 +86,22 @@ const Dashboard = () => {
         : [...prevSelected, docId]
     );
   };
+  const handleSettings = async () => {
+    try {
+      const userData = await GetUserData();
+      if (userData) {
+        navigate(`/settings/${userData.$id}`);
+      } else {
+        navigate("/");
+      }
+    } catch (error) {
+      navigate("/");
+    }
 
+  
+  }
+    
+  // Function to delete multiple selected documents
   const MassDelete = async () => {
     alert("Are you sure you want to delete these documents?");
     try {
@@ -95,6 +118,7 @@ const Dashboard = () => {
     }
   };
 
+  // Function to delete a single document
   const Delete = async (docId) => {
     try {
       await databases.deleteDocument(
@@ -111,10 +135,12 @@ const Dashboard = () => {
     }
   };
 
+  // Function to refresh the page
   const Refresh = async () => {
     location.reload();
   };
 
+  // Function to render document content
   const renderContent = (content) => {
     if (typeof content === 'string') {
       try {
@@ -137,6 +163,8 @@ const Dashboard = () => {
       >
         Logout
       </button>
+
+      <IoSettings className="text-4xl text-gray-500 absolute top-4 left-4" onClick={handleSettings} />
 
       <h1 className="text-3xl font-bold mt-4 animate-fade-in">Welcome, {user?.name}!</h1>
       <h2 className="text-xl font-semibold mt-6 animate-fade-in">Your notes:</h2>
@@ -204,10 +232,9 @@ const Dashboard = () => {
           Delete
         </button>
       )}
-
+      
       <ToastContainer />
     </div>
-   
   );
 };
 

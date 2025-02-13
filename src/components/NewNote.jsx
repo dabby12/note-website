@@ -49,6 +49,7 @@ const MarkButton = ({ format, icon: Icon }) => {
                 toggleMark(editor, format);
             }}
             className="p-2 border rounded hover:bg-gray-200"
+            tabIndex="-1"
         >
             <Icon size={18} />
         </button>
@@ -68,7 +69,7 @@ const NewNote = () => {
     const initialValue = [
         {
             type: 'paragraph',
-            children: [{ text: '' }],
+            children: [{ text: ' ' }],
         },
     ];
 
