@@ -10,6 +10,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@coreui/icons": "^3.0.1",
+    "@coreui/icons-react": "^2.3.0",
+    "@coreui/react": "^5.5.0",
     "@heroicons/react": "^2.2.0",
     "@tinymce/tinymce-react": "^5.1.1",
     "@types/is-hotkey": "^0.1.10",

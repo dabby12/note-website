@@ -164,7 +164,7 @@ const Dashboard = () => {
         Logout
       </button>
 
-      <IoSettings className="text-4xl text-gray-500 absolute top-4 left-4" onClick={handleSettings} />
+      <IoSettings className="text-4xl text-gray-500 absolute top-4 left-4 hover: cursor-pointer" onClick={handleSettings} />
 
       <h1 className="text-3xl font-bold mt-4 animate-fade-in">Welcome, {user?.name}!</h1>
       <h2 className="text-xl font-semibold mt-6 animate-fade-in">Your notes:</h2>
