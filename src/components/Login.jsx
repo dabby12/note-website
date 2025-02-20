@@ -3,6 +3,7 @@ import { account } from "../api/appwrite.cjs";
 import { useNavigate } from "react-router-dom";
 import Google from "../assets/google.svg";
 import Images from "./Images";
+import { OAuthProvider } from "appwrite"
 const Login = () => {
     const navigate = useNavigate();
     const [email, setEmail] = useState("");
@@ -32,11 +33,12 @@ const Login = () => {
     const handleGoogleLogin = async () => {
         setLoading(true);
         try {
-            account.createOAuth2Session(
-                "google",
+            await account.createOAuth2Session(
+                OAuthProvider.Google,
                 "http://localhost:5173/dashboard", // Redirect on success
                 "http://localhost:5173/login"  // Redirect on failure
             );
+            navigate("/dashboard");
         } catch (error) {
             console.error("Google Login Error:", error);
             setError("Google login failed. Try again.");

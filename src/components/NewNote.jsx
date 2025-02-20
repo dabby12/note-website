@@ -8,6 +8,9 @@ import { Editor, Transforms, createEditor, Element as SlateElement } from 'slate
 import { withHistory } from 'slate-history';
 import { Bold, Italic, Underline, Strikethrough } from 'lucide-react';
 
+const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID; // Replace with your actual Database ID
+const COLLECTION_ID = import.meta.env.VITE_APPWRITE_COLLECTION_ID; // Replace with your actual Collection ID
+
 const GetUserData = async () => {
     try {
         const userData = await account.get();
@@ -59,7 +62,7 @@ const MarkButton = ({ format, icon: Icon }) => {
 const NewNote = () => {
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
-    const [date, setDate] = useState('');
+    const [date, setDate] = useState(new Date());
     const [userID, setUserID] = useState(null);
     const notifyError = () => toast.error('Error creating note');
     const notify = () => toast.success('Note created successfully');
@@ -95,14 +98,14 @@ const NewNote = () => {
         e.preventDefault();
         try {
             const result = await databases.createDocument(
-                '679a016a0007d89e8356',
-                '679a016f0005a850c549',
+                DATABASE_ID,
+                COLLECTION_ID,
                 'unique()',
                 {
                     Name: name,
                     Description: description,
                     Content: JSON.stringify(editor.children),
-                    Date: date,
+                    Date: date.toISOString(),
                     userID: userID
                 },
                 ["read(\"any\")"]
@@ -118,7 +121,7 @@ const NewNote = () => {
         }
         setName('');
         setDescription('');
-        setDate('');
+        setDate(new Date());
         Transforms.delete(editor, {
             at: {
                 anchor: Editor.start(editor, []),
@@ -172,9 +175,9 @@ const NewNote = () => {
                 <div className="mb-4">
                     <label className="block text-gray-700">Date:</label>
                     <input
-                        type="datetime-local"
-                        value={date}
-                        onChange={(e) => setDate(e.target.value)}
+                        type="date"
+                        value={date.toISOString().split('T')[0]}
+                        onChange={(e) => setDate(new Date(e.target.value))}
                         className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring focus:border-blue-300"
                     />
                 </div>

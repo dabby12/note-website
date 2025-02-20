@@ -3,8 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { account, databases } from '../api/appwrite.cjs';
 import { MdSave, MdDelete, MdCancel } from 'react-icons/md';
-const DATABASE_ID = "679a016a0007d89e8356";  // Replace with your actual Database ID
-const COLLECTION_ID = "679a016f0005a850c549";  // Replace with your actual Collection ID
+const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID; // Replace with your actual Database ID
+const COLLECTION_ID = import.meta.env.VITE_APPWRITE_COLLECTION_ID; // Replace with your actual Collection ID
 
 function EditScreen() {
   const { id } = useParams();

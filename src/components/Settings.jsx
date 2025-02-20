@@ -1,21 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import Sidebar from '../components/Special/Sidebar';
 import { ToastContainer, toast } from 'react-toastify';
 import { account } from '../api/appwrite.cjs';
 
-function Settings() {
+function Settings({ userData }) {
     const navigate = useNavigate();
+    const { userid } = useParams();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [userData, setUserData] = useState(null);
+    const [localUserData, setLocalUserData] = useState(null);
     const SuccessSignOut = () => toast.success('Successfully signed out!');
 
     const getUser = async () => {
         try {
             const userData = await account.get();
             setEmail(userData.email);
-            setUserData(userData);
+            setLocalUserData(userData);
             console.log("User data:", userData);
             if (!userData.passwordUpdate) {
                 console.log("User does not have a password, prompt to set one.");
@@ -41,7 +42,7 @@ function Settings() {
             SuccessSignOut();
             setTimeout(() => {
                 navigate("/"); // Redirect to login after logout
-            }, 1000); // Wait for 1 second before redirecting
+            }, 500); // Wait for 1 second before redirecting
         } catch (error) {
             console.error("Failed to logout:", error);
         }
@@ -105,10 +106,10 @@ function Settings() {
                     <h2 className="text-xl font-semibold mb-2">Profile Settings</h2>
                     <div className="mb-4 block text-gray-700 font-medium">
                         <a>
-                            Current Email: {userData?.email}
+                            Current Email: {localUserData?.email}
                         </a>
                     </div>
-                    {userData && !userData.passwordUpdate ? (
+                    {localUserData && !localUserData.passwordUpdate ? (
                         <div className="mb-4">
                             <label className="block text-gray-700">New Password</label>
                             <input
@@ -161,6 +162,7 @@ function Settings() {
                             >
                                 Save Changes
                             </button>
+                            
                         </>
                     )}
                 </div>

@@ -9,6 +9,9 @@ import Images from "./components/Images";
 import NotFound from "./components/NotFound";
 import NewNote from "./components/NewNote";
 import Settings from "./components/Settings";
+import UserAccount from "./components/Settings/UserAccount";
+import AppPreferences from "./components/Settings/AppPreferences";
+import PrivacySecurity from "./components/Settings/PrivacySecurity";
 
 
 function App() {
@@ -25,6 +28,10 @@ function App() {
         <Route path="*" element={<NotFound />} />
         <Route path="/new" element={<NewNote />} />
         <Route path="/settings/:id" element={<Settings />} />
+        <Route path="/settings/account/:userid" element={<UserAccount />} />
+        <Route path="/settings/preferences/:userid" element={<AppPreferences />} />
+        <Route path="/settings/privacy/:userid" element={<PrivacySecurity />} />
+
       </Routes>
     </Router>
   );

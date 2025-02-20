@@ -7,9 +7,9 @@ import { IoIosCheckmarkCircle } from "react-icons/io";
 import { ToastContainer, toast } from 'react-toastify';
 import { Query } from "appwrite";
 import { IoSettings } from "react-icons/io5";
-import Settings from "./Settings"
-const DATABASE_ID = "679a016a0007d89e8356";  // Replace with your actual Database ID
-const COLLECTION_ID = "679a016f0005a850c549";  // Replace with your actual Collection ID
+
+const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID; // Replace with your actual Database ID
+const COLLECTION_ID = import.meta.env.VITE_APPWRITE_COLLECTION_ID; // Replace with your actual Collection ID
 
 // Function to get user data
 const GetUserData = async () => {
