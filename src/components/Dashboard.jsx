@@ -7,15 +7,25 @@ import { IoIosCheckmarkCircle } from "react-icons/io";
 import { ToastContainer, toast } from 'react-toastify';
 import { Query } from "appwrite";
 import { IoSettings } from "react-icons/io5";
-
+import { MdDelete } from "react-icons/md";
+import miku from "../assets/test-miku.jpg";
+import {
+  Menu,
+  MenuHandler,
+  MenuList,
+  MenuItem,
+} from "@material-tailwind/react";  
+import { GrLogout } from "react-icons/gr";
 const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID; // Replace with your actual Database ID
 const COLLECTION_ID = import.meta.env.VITE_APPWRITE_COLLECTION_ID; // Replace with your actual Collection ID
-
+const PREF_COLLECTION_ID = import.meta.env.VITE_APPWRITE_PREF_COLLECTION_ID;
 // Function to get user data
-const GetUserData = async () => {
+const GetUserData = async (setUser) => {
   try {
     const userData = await account.get();
-    console.log(userData)
+    console.log(userData);
+    setUser(userData);
+    localStorage.setItem('user', JSON.stringify(userData));
     return userData;
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -28,12 +38,12 @@ const Dashboard = () => {
   const [documents, setDocuments] = useState([]); // State to store documents
   const [selectedDocuments, setSelectedDocuments] = useState([]); // State to store selected documents
   const navigate = useNavigate(); // Hook to navigate between routes
-
+  const [preferences, setPreferences] = useState([]); // State to store preferences
   // Effect to check user authentication
   useEffect(() => {
     const checkUser = async () => {
       try {
-        const userData = await GetUserData();
+        const userData = await GetUserData(setUser);
         setUser(userData);
         if (!localStorage.getItem('loggedIn')) {
           toast.success("Welcome, " + userData.name); // Show toast notification after setting user
@@ -86,20 +96,6 @@ const Dashboard = () => {
         : [...prevSelected, docId]
     );
   };
-  const handleSettings = async () => {
-    try {
-      const userData = await GetUserData();
-      if (userData) {
-        navigate(`/settings/${userData.$id}`);
-      } else {
-        navigate("/");
-      }
-    } catch (error) {
-      navigate("/");
-    }
-
-  
-  }
     
   // Function to delete multiple selected documents
   const MassDelete = async () => {
@@ -154,18 +150,63 @@ const Dashboard = () => {
     }
     return <p>{content}</p>;
   };
+  const createPrefs = async () => {
+    const userID = localStorage.getItem('user').$id;
+    try {
+      await databases.createDocument(
+        DATABASE_ID,
+        PREF_COLLECTION_ID,
+        'unique()',
+        {
+          theme: "light",
+          notifications: true,
+          userid: userID
+        },
+        ["read(\"any\")"]
+      );
+    } catch (error) {
+      console.error("Error creating preferences:", error);
+    }
+  };
+  const fetchPrefs = async () => {
+    try {
+      const response = await databases.listDocuments(
+        DATABASE_ID, 
+        PREF_COLLECTION_ID, 
+        [Query.equal("userid", user.$id)]
+      );
+      setPreferences(response.documents);
+      if (response.documents.length === 0) {
+        createPrefs();
+      } else {
 
+        console.log("Preferences fetched successfully:", response.documents);
+      }
+    } catch (error) {
+      console.error("Error fetching preferences:", error);
+    }
+  }
+  useEffect(() => {
+    if (user) {
+      fetchPrefs();
+    }
+  }, [user]);
+  const handleSettings = async () => {
+    try {
+      const userData = await GetUserData();
+      if (userData) {
+      const userData = await GetUserData(setUser);
+      } else {
+        navigate(`/settings/${preferences[0].$id}`);
+      }
+    } catch (error) {
+      navigate("/");
+    }
+  }
+                  
+   
   return (
     <div className="flex flex-col items-center h-screen">
-      <button 
-        onClick={handleLogout} 
-        className="mt-4 bg-red-500 text-white px-4 py-2 rounded absolute top-4 right-4 transition duration-300 transform hover:scale-105"
-      >
-        Logout
-      </button>
-
-      <IoSettings className="text-4xl text-gray-500 absolute top-4 left-4 hover: cursor-pointer" onClick={handleSettings} />
-
       <h1 className="text-3xl font-bold mt-4 animate-fade-in">Welcome, {user?.name}!</h1>
       <h2 className="text-xl font-semibold mt-6 animate-fade-in">Your notes:</h2>
 
@@ -176,7 +217,7 @@ const Dashboard = () => {
               <div
                 key={doc.$id}
                 className={`relative w-64 h-64 px-2 shadow-teal-500 m-2 rounded-lg transition duration-300 transform hover:scale-105 ${
-                  selectedDocuments.includes(doc.$id) ? <IoIosCheckmarkCircle className="absolute top-2 left-2 text-green-500" /> : ''
+                  selectedDocuments.includes(doc.$id) ? 'border-2 border-blue-500' : ''
                 }`}
                 onClick={() => handleSelectDocument(doc.$id)}
               >
@@ -194,7 +235,6 @@ const Dashboard = () => {
                   <li className="p-2 border-b">{renderContent(doc.Content)}</li>
                   <li className="p-2 border-b">{formatDate(doc.Date)}</li>
                   <li className="p-2 border-b">{doc.$id}</li>
-                  
 
                   <button 
                     className="p-2 border-t flex items-center justify-center w-full bg-blue-500 text-white hover:bg-blue-600 transition duration-300 rounded-b-lg"
@@ -218,21 +258,29 @@ const Dashboard = () => {
       {selectedDocuments.length > 1 && (
         <button 
           onClick={MassDelete}
-          className="mt-4 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition duration-300 transform hover:scale-105"
+          className="mt-4 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition duration-300 transform hover:scale-105 flex items-center justify-center"
         >
-          Delete all selected
+          <MdDelete className="mr-2" /> Delete all selected
         </button>
       )}
 
       {selectedDocuments.length === 1 && (
         <button 
-          onClick={Delete}
-          className="mt-4 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition duration-300 transform hover:scale-105"
+          onClick={() => Delete(selectedDocuments[0])}
+          className="mt-4 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition duration-300 transform hover:scale-105 flex items-center justify-center"
         >
-          Delete
+          <MdDelete className="mr-2" /> Delete
         </button>
       )}
-      
+      <Menu>
+        <MenuHandler>
+          <img src={miku} alt="Miku" className="absolute top-3 right-3 w-14 h-14 border-2 border-gray-300 rounded-full hover:cursor-pointer"  />
+        </MenuHandler>
+        <MenuList className="text-sm">
+          <MenuItem className="hover:text-red-500 flex items-center mb-0.5" onClick={handleLogout}> <GrLogout className="mr-2" />Logout </MenuItem>
+          <MenuItem className="hover:text-blue-500 flex items-center" onClick={handleSettings}><IoSettings className="mr-2" />Settings</MenuItem>
+        </MenuList>
+      </Menu>
       <ToastContainer />
     </div>
   );

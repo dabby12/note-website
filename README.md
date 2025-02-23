@@ -14,7 +14,7 @@ This is a Vite + React project that includes various features such as user authe
 
 1. Clone the repository:
     ```sh
-    git clone https://github.com/your-username/vite-project.git
+    git clone https://github.com/dabby12/note-website
     cd vite-project
     ```
 

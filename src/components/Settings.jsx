@@ -11,6 +11,7 @@ function Settings({ userData }) {
     const [password, setPassword] = useState('');
     const [localUserData, setLocalUserData] = useState(null);
     const SuccessSignOut = () => toast.success('Successfully signed out!');
+    
 
     const getUser = async () => {
         try {
@@ -73,12 +74,40 @@ function Settings({ userData }) {
             await account.updatePassword(password);
             toast.success("Password updated successfully");
             setPassword('');
+            reload();
         } catch (error) {
             console.error("Failed to update password:", error);
             toast.error("Failed to update password", error);
         }
     };
-
+console.log(`
+    
+░█████╗░██████╗░░█████╗░██╗░░██╗  ██╗░░░░░██╗███╗░░██╗██╗░░░██╗██╗░░██╗
+██╔══██╗██╔══██╗██╔══██╗██║░░██║  ██║░░░░░██║████╗░██║██║░░░██║╚██╗██╔╝
+███████║██████╔╝██║░░╚═╝███████║  ██║░░░░░██║██╔██╗██║██║░░░██║░╚███╔╝░
+██╔══██║██╔══██╗██║░░██╗██╔══██║  ██║░░░░░██║██║╚████║██║░░░██║░██╔██╗░
+██║░░██║██║░░██║╚█████╔╝██║░░██║  ███████╗██║██║░╚███║╚██████╔╝██╔╝╚██╗
+╚═╝░░╚═╝╚═╝░░╚═╝░╚════╝░╚═╝░░╚═╝  ╚══════╝╚═╝╚═╝░░╚══╝░╚═════╝░╚═╝░░╚═╝
+`);
+console.log("                   -`");
+console.log("                  .o+`");
+console.log("                 `ooo/");
+console.log("                `+oooo:");
+console.log("               `+oooooo:");
+console.log("               -+oooooo+:");
+console.log("             `/:-:++oooo+:");
+console.log("            `/++++/+++++++:");
+console.log("           `/++++++++++++++:");
+console.log("          `/+++ooooooooooooo/`");
+console.log("         ./ooosssso++osssssso+`");
+console.log("        .oossssso-\\`\\`/ossssss+`");
+console.log("       -osssssso.      :ssssssso.");
+console.log("      :osssssss/        osssso+++.");
+console.log("     /ossssssss/        +ssssooo/-");
+console.log("   `/ossssso+/:-        -:/+osssso+-");
+console.log("  `+sso+:-`                 `.-/+oso:");
+console.log(" `++:.                           `-/+/");
+console.log(" .`                                 `/");
     return (
         <>
             <div className="flex min-h-screen">
@@ -129,14 +158,6 @@ function Settings({ userData }) {
                     ) : (
                         <>
                             <div className="mb-4">
-                                <label className="block text-gray-700">Username</label>
-                                <input
-                                    type="text"
-                                    className="w-full p-2 border border-gray-300 rounded mt-1"
-                                    placeholder="Enter your username"
-                                />
-                            </div>
-                            <div className="mb-4">
                                 <label className="block text-gray-700"> New email</label>
                                 <input
                                     type="email"
@@ -155,12 +176,31 @@ function Settings({ userData }) {
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                 />
+                            
+                            </div>
+                            <div className="mb-4">
+                                <label className="block text-gray-700">New password</label>
+                                <input
+                                    type="password"
+                                    className="w-full p-2 border border-gray-300 rounded mt-1"
+                                    placeholder="Enter your new password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    
+                                />
+                            
                             </div>
                             <button
                                 className="bg-green-500 text-white p-2 rounded hover:bg-green-600"
                                 onClick={updateEmail}
                             >
                                 Save Changes
+                            </button>
+                            <button
+                                className="bg-violet-400 text-white p-2 rounded hover:bg-red-600 ml-2"
+                                onClick={updatePassword}
+                            >
+                                Update Password
                             </button>
                             
                         </>

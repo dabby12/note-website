@@ -6,4 +6,4 @@ function PrivacySecurity() {
   )
 }
 
-export default PrivacySecurity;
+export default PrivacySecurity

@@ -8,3 +8,5 @@ export const account = new Account(client);
 export const databases = new Databases(client);
 export const query = new Query();
 export const avatars = new Avatars(client);
+export const { create, update, listDocuments, getDocument, deleteDocument } = databases;
+export const { get, updateEmail, updatePassword, deleteSession } = account;
