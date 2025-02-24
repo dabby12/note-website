@@ -5,9 +5,9 @@ import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom';
 import { Editable, withReact, Slate, useSlate } from 'slate-react';
 import { Editor, Transforms, createEditor, Element as SlateElement } from 'slate';
+import { AiOutlinePlus } from "react-icons/ai";
 import { withHistory } from 'slate-history';
 import { Bold, Italic, Underline, Strikethrough } from 'lucide-react';
-
 const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID; // Replace with your actual Database ID
 const COLLECTION_ID = import.meta.env.VITE_APPWRITE_COLLECTION_ID; // Replace with your actual Collection ID
 
@@ -20,13 +20,6 @@ const GetUserData = async () => {
         console.error("Error fetching user data:", error);
         return null;
     }
-};
-
-const HOTKEYS = {
-    'mod+b': 'bold',
-    'mod+i': 'italic',
-    'mod+u': 'underline',
-    'mod+shift+x': 'strikethrough'
 };
 
 const toggleMark = (editor, format) => {
@@ -64,6 +57,8 @@ const NewNote = () => {
     const [description, setDescription] = useState('');
     const [date, setDate] = useState(new Date());
     const [userID, setUserID] = useState(null);
+    const [tagInput, setTagInput] = useState('');
+    const [tags, setTags] = useState([]);
     const notifyError = () => toast.error('Error creating note');
     const notify = () => toast.success('Note created successfully');
     const navigate = useNavigate();
@@ -106,7 +101,8 @@ const NewNote = () => {
                     Description: description,
                     Content: JSON.stringify(editor.children),
                     Date: date.toISOString(),
-                    userID: userID
+                    userID: userID,
+                    tags: tags.map(tag => tag.trim()) // Trim whitespace from tags
                 },
                 ["read(\"any\")"]
             );
@@ -122,12 +118,25 @@ const NewNote = () => {
         setName('');
         setDescription('');
         setDate(new Date());
+        setTags([]);
+        setTagInput('');
         Transforms.delete(editor, {
             at: {
                 anchor: Editor.start(editor, []),
                 focus: Editor.end(editor, []),
             },
         });
+    };
+
+    const handleAddTag = () => {
+        if (tagInput.trim() !== '') {
+            setTags([...tags, tagInput.trim()]);
+            setTagInput('');
+        }
+    };
+
+    const handleRemoveTag = (index) => {
+        setTags(tags.filter((_, i) => i !== index));
     };
 
     return (
@@ -169,6 +178,34 @@ const NewNote = () => {
                                 renderLeaf={renderLeaf}
                             />
                         </Slate>
+                    </div>
+                </div>
+
+                <div className="mb-4">
+                    <label className="block text-gray-700">Tags:</label>
+                    <div className="flex items-center mb-2">
+                        <input
+                            type="text"
+                            value={tagInput}
+                            onChange={(e) => setTagInput(e.target.value)}
+                            className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring focus:border-blue-300"
+                            placeholder="Enter a tag"
+                        />
+                        <AiOutlinePlus className="ml-2 text-gray-500 font-bold text-2xl cursor-pointer" onClick={handleAddTag} />
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                        {tags.map((tag, index) => (
+                            <div key={index} className="bg-blue-200 text-blue-800 px-2 py-1 rounded-lg flex items-center">
+                                <span>{tag}</span>
+                                <button
+                                    type="button"
+                                    className="ml-2 text-red-500"
+                                    onClick={() => handleRemoveTag(index)}
+                                >
+                                    &times;
+                                </button>
+                            </div>
+                        ))}
                     </div>
                 </div>
 

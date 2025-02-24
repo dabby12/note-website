@@ -2,7 +2,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { account, databases } from '../api/appwrite.cjs';
-import { MdSave, MdDelete, MdCancel } from 'react-icons/md';
+import { Save, Trash2, X } from 'lucide-react';
+import { AiOutlinePlus } from "react-icons/ai";
+
 const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID; // Replace with your actual Database ID
 const COLLECTION_ID = import.meta.env.VITE_APPWRITE_COLLECTION_ID; // Replace with your actual Collection ID
 
@@ -12,6 +14,8 @@ function EditScreen() {
   const [note, setNote] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [tagInput, setTagInput] = useState('');
+  const [tags, setTags] = useState([]);
 
   useEffect(() => {
     const fetchNote = async () => {
@@ -21,6 +25,7 @@ function EditScreen() {
         console.log('Fetched note:', response);
         const formattedDate = new Date(response.Date).toISOString().split('T')[0];
         setNote({ ...response, Date: formattedDate });
+        setTags(response.tags || []); // This line sets the tags
       } catch (error) {
         console.error('Error fetching note:', error);
         setError('Error fetching note');
@@ -28,9 +33,10 @@ function EditScreen() {
         setLoading(false);
       }
     };
-
+  
     fetchNote();
   }, [id]);
+  
 
   const handleSave = async () => {
     try {
@@ -40,7 +46,7 @@ function EditScreen() {
         DATABASE_ID, // databaseId
         COLLECTION_ID, // collectionId
         note.$id, // documentId
-        noteData, // data
+        { ...noteData, tags: tags }, // data
         ["read(\"any\")"] // permissions
       );
       console.log('Note saved:', result);
@@ -66,6 +72,17 @@ function EditScreen() {
   const handleCancel = () => {
     console.log('Cancel editing');
     navigate('/dashboard');
+  };
+
+  const handleAddTag = () => {
+    if (tagInput.trim() !== '') {
+      setTags([...tags, tagInput.trim()]);
+      setTagInput('');
+    }
+  };
+
+  const handleRemoveTag = (index) => {
+    setTags(tags.filter((_, i) => i !== index));
   };
 
   if (loading) {
@@ -109,15 +126,42 @@ function EditScreen() {
             onChange={(e) => setNote({ ...note, Date: e.target.value })}
             className="w-full p-2 mb-4 border rounded"
           />
-          <div className="flex justify-between">
+          <div className="mb-4">
+            <label className="block text-gray-700">Tags:</label>
+            <div className="flex items-center mb-2">
+              <input
+                type="text"
+                value={tagInput}
+                onChange={(e) => setTagInput(e.target.value)}
+                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring focus:border-blue-300"
+                placeholder="Enter a tag"
+              />
+              <AiOutlinePlus className="ml-2 text-gray-500 font-bold text-2xl cursor-pointer" onClick={handleAddTag} />
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {tags.map((tag, index) => (
+                <div key={index} className="bg-blue-200 text-blue-800 px-2 py-1 rounded-lg flex items-center">
+                  <span>{tag}</span>
+                  <button
+                    type="button"
+                    className="ml-2 text-red-500"
+                    onClick={() => handleRemoveTag(index)}
+                  >
+                    &times;
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="flex justify-between mt-4">
             <button onClick={handleSave} className="bg-blue-500 text-white px-4 py-2 rounded flex items-center">
-              <MdSave className="mr-2" /> Save
+              <Save className="mr-2" /> Save
             </button>
             <button onClick={handleDelete} className="bg-red-500 text-white px-4 py-2 rounded flex items-center">
-              <MdDelete className="mr-2" /> Delete
+              <Trash2 className="mr-2" /> Delete
             </button>
             <button onClick={handleCancel} className="bg-gray-500 text-white px-4 py-2 rounded flex items-center">
-              <MdCancel className="mr-2" /> Cancel
+              <X className="mr-2" /> Cancel
             </button>
           </div>
         </div>

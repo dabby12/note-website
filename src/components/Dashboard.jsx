@@ -209,14 +209,14 @@ const Dashboard = () => {
     <div className="flex flex-col items-center h-screen">
       <h1 className="text-3xl font-bold mt-4 animate-fade-in">Welcome, {user?.name}!</h1>
       <h2 className="text-xl font-semibold mt-6 animate-fade-in">Your notes:</h2>
-
+  
       <div className="flex flex-row items-start justify-center flex-grow flex-wrap">
         <ul className="mt-4 px-2 flex flex-row flex-wrap rounded-lg">
           {documents.length > 0 ? (
             documents.map((doc) => (
               <div
                 key={doc.$id}
-                className={`relative w-64 h-64 px-2 shadow-teal-500 m-2 rounded-lg transition duration-300 transform hover:scale-105 ${
+                className={`relative w-64 h-auto px-2 shadow-teal-500 m-2 rounded-lg transition duration-300 transform hover:scale-105 ${
                   selectedDocuments.includes(doc.$id) ? 'border-2 border-blue-500' : ''
                 }`}
                 onClick={() => handleSelectDocument(doc.$id)}
@@ -228,16 +228,34 @@ const Dashboard = () => {
                     <FaRegCircle className="text-gray-500 text-lg" />
                   )}
                 </div>
-
-                <div className="bg-white h-64 rounded-lg text-black border border-gray-300 overflow-hidden">
+  
+                <div className="bg-white rounded-lg text-black border border-gray-300 overflow-hidden">
                   <li className="p-2 border-b m-2 font-bold">{doc.Name}</li>
                   <li className="p-2 border-b rounded-md">{doc.Description}</li>
                   <li className="p-2 border-b">{renderContent(doc.Content)}</li>
                   <li className="p-2 border-b">{formatDate(doc.Date)}</li>
                   <li className="p-2 border-b">{doc.$id}</li>
-
-                  <button 
-                    className="p-2 border-t flex items-center justify-center w-full bg-blue-500 text-white hover:bg-blue-600 transition duration-300 rounded-b-lg"
+  
+                  {/* Display tags only if there are any */}
+                  {doc.tags && doc.tags.length > 0 && (
+                    <div className="p-2 border-b">
+                      <strong>Tags:</strong>
+                      <ul className="flex flex-wrap gap-2 mt-2">
+                        {doc.tags.map((tag, index) => (
+                          <li
+                            key={index}
+                            className="bg-gray-200 text-sm px-3 py-1 rounded-full text-gray-700"
+                          >
+                            {tag}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+  
+                  {/* Edit button */}
+                  <button
+                    className="p-2 bg-blue-500 text-white hover:bg-blue-600 transition duration-300 rounded-b-lg w-full mt-4 flex items-center justify-center"
                     onClick={() => navigate(`/edit/${doc.$id}`)}
                   >
                     <MdEdit className="mr-2" /> Edit
@@ -250,40 +268,51 @@ const Dashboard = () => {
           )}
         </ul>
       </div>
-
+  
       <a className="fixed bottom-4 right-4 text-blue-500 transition duration-300 transform hover:scale-110" href="/new">
         <FaPen className="text-3xl text-blue-500" />
       </a>
-      
+  
       {selectedDocuments.length > 1 && (
-        <button 
+        <button
           onClick={MassDelete}
-          className="mt-4 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition duration-300 transform hover:scale-105 flex items-center justify-center"
+          className="mt-4 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition duration-300 transform hover:scale-105 flex items-center justify-center m-4"
         >
           <MdDelete className="mr-2" /> Delete all selected
         </button>
       )}
-
+  
       {selectedDocuments.length === 1 && (
-        <button 
+        <button
           onClick={() => Delete(selectedDocuments[0])}
-          className="mt-4 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition duration-300 transform hover:scale-105 flex items-center justify-center"
+          className="mt-4 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition duration-300 transform hover:scale-105 flex items-center justify-center m-4"
         >
           <MdDelete className="mr-2" /> Delete
         </button>
       )}
+  
       <Menu>
         <MenuHandler>
-          <img src={miku} alt="Miku" className="absolute top-3 right-3 w-14 h-14 border-2 border-gray-300 rounded-full hover:cursor-pointer"  />
+          <img
+            src={miku}
+            alt="Miku"
+            className="absolute top-3 right-3 w-14 h-14 border-2 border-gray-300 rounded-full hover:cursor-pointer"
+          />
         </MenuHandler>
         <MenuList className="text-sm">
-          <MenuItem className="hover:text-red-500 flex items-center mb-0.5" onClick={handleLogout}> <GrLogout className="mr-2" />Logout </MenuItem>
-          <MenuItem className="hover:text-blue-500 flex items-center" onClick={handleSettings}><IoSettings className="mr-2" />Settings</MenuItem>
+          <MenuItem className="hover:text-red-500 flex items-center mb-0.5" onClick={handleLogout}>
+            <GrLogout className="mr-2" /> Logout
+          </MenuItem>
+          <MenuItem className="hover:text-blue-500 flex items-center" onClick={handleSettings}>
+            <IoSettings className="mr-2" /> Settings
+          </MenuItem>
         </MenuList>
       </Menu>
+  
       <ToastContainer />
     </div>
   );
-};
+  
+}  
 
 export default Dashboard;
