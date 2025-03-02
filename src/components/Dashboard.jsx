@@ -8,7 +8,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import { Query } from "appwrite";
 import { IoSettings } from "react-icons/io5";
 import { MdDelete } from "react-icons/md";
-import miku from "../assets/test-miku.jpg";
+import miku from "../assets/miku.jpg";
 import {
   Menu,
   MenuHandler,
@@ -20,18 +20,7 @@ const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID; // Replace with y
 const COLLECTION_ID = import.meta.env.VITE_APPWRITE_COLLECTION_ID; // Replace with your actual Collection ID
 const PREF_COLLECTION_ID = import.meta.env.VITE_APPWRITE_PREF_COLLECTION_ID;
 // Function to get user data
-const GetUserData = async (setUser) => {
-  try {
-    const userData = await account.get();
-    console.log(userData);
-    setUser(userData);
-    localStorage.setItem('user', JSON.stringify(userData));
-    return userData;
-  } catch (error) {
-    console.error("Error fetching user data:", error);
-    return null;
-  }
-};
+
 
 const Dashboard = () => {
   const [user, setUser] = useState(null); // State to store user data
@@ -40,6 +29,18 @@ const Dashboard = () => {
   const navigate = useNavigate(); // Hook to navigate between routes
   const [preferences, setPreferences] = useState([]); // State to store preferences
   // Effect to check user authentication
+  const GetUserData = async (setUser) => {
+    try {
+      const userData = await account.get();
+      console.log(userData);
+      setUser(userData);
+      localStorage.setItem('user', JSON.stringify(userData));
+      return userData;
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+      return null;
+    }
+  };
   useEffect(() => {
     const checkUser = async () => {
       try {
@@ -204,7 +205,7 @@ const Dashboard = () => {
     }
   }
                   
-   
+  console.error("FIX EDITSCREEN RENDER")
   return (
     <div className="flex flex-col items-center h-screen">
       <h1 className="text-3xl font-bold mt-4 animate-fade-in">Welcome, {user?.name}!</h1>
@@ -217,7 +218,7 @@ const Dashboard = () => {
               <div
                 key={doc.$id}
                 className={`relative w-64 h-auto px-2 shadow-teal-500 m-2 rounded-lg transition duration-300 transform hover:scale-105 ${
-                  selectedDocuments.includes(doc.$id) ? 'border-2 border-blue-500' : ''
+                  selectedDocuments.includes(doc.$id) ? '' : ''
                 }`}
                 onClick={() => handleSelectDocument(doc.$id)}
               >

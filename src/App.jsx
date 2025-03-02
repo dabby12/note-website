@@ -12,13 +12,15 @@ import Settings from "./components/Settings";
 import UserAccount from "./components/Settings/UserAccount";
 import AppPreferences from "./components/Settings/AppPreferences";
 import PrivacySecurity from "./components/Settings/PrivacySecurity";
+import LandingPage from "./components/LandingPage/LandingPage"
 
 
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Login />} />
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/edit/:id" element={<EditScreen />} />

@@ -5,8 +5,8 @@ import { account, databases } from '../api/appwrite.cjs';
 import { Save, Trash2, X } from 'lucide-react';
 import { AiOutlinePlus } from "react-icons/ai";
 
-const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID; // Replace with your actual Database ID
-const COLLECTION_ID = import.meta.env.VITE_APPWRITE_COLLECTION_ID; // Replace with your actual Collection ID
+const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID;
+const COLLECTION_ID = import.meta.env.VITE_APPWRITE_COLLECTION_ID;
 
 function EditScreen() {
   const { id } = useParams();
@@ -16,7 +16,8 @@ function EditScreen() {
   const [error, setError] = useState(null);
   const [tagInput, setTagInput] = useState('');
   const [tags, setTags] = useState([]);
-
+  const [editableContent, setEditableContent] = useState('');
+  
   useEffect(() => {
     const fetchNote = async () => {
       try {
@@ -24,8 +25,25 @@ function EditScreen() {
         const response = await databases.getDocument(DATABASE_ID, COLLECTION_ID, id);
         console.log('Fetched note:', response);
         const formattedDate = new Date(response.Date).toISOString().split('T')[0];
+        
+        // Convert JSON content to editable string
+        let contentString = '';
+        if (typeof response.Content === 'string') {
+          try {
+            const parsedContent = JSON.parse(response.Content);
+            contentString = parsedContent.map(block => 
+              block.children?.map(child => child.text).join('')
+            ).join('\n');
+          } catch (error) {
+            contentString = response.Content;
+          }
+        } else {
+          contentString = String(response.Content || '');
+        }
+        
+        setEditableContent(contentString);
         setNote({ ...response, Date: formattedDate });
-        setTags(response.tags || []); // This line sets the tags
+        setTags(response.tags || []);
       } catch (error) {
         console.error('Error fetching note:', error);
         setError('Error fetching note');
@@ -37,17 +55,32 @@ function EditScreen() {
     fetchNote();
   }, [id]);
   
+  const handleContentChange = (e) => {
+    setEditableContent(e.target.value);
+  };
 
   const handleSave = async () => {
     try {
       console.log('Saving note:', note);
+      
+      // Convert editable content back to JSON format
+      const contentLines = editableContent.split('\n');
+      const jsonContent = JSON.stringify(contentLines.map(line => ({
+        type: 'paragraph',
+        children: [{ text: line }]
+      })));
+      
       const { $databaseId, $collectionId, ...noteData } = note;
       const result = await databases.updateDocument(
-        DATABASE_ID, // databaseId
-        COLLECTION_ID, // collectionId
-        note.$id, // documentId
-        { ...noteData, tags: tags }, // data
-        ["read(\"any\")"] // permissions
+        DATABASE_ID,
+        COLLECTION_ID,
+        note.$id,
+        { 
+          ...noteData, 
+          Content: jsonContent,
+          tags: tags 
+        },
+        ["read(\"any\")"]
       );
       console.log('Note saved:', result);
       navigate('/dashboard');
@@ -57,6 +90,7 @@ function EditScreen() {
     }
   };
 
+  // [Rest of your existing functions: handleDelete, handleCancel, etc.]
   const handleDelete = async () => {
     try {
       console.log('Deleting note with ID:', id);
@@ -94,13 +128,13 @@ function EditScreen() {
   }
 
   return (
-    <div className="flex flex-col items-center h-screen">
+    <div className="flex flex-col items-center h-screen w-full">
       <button onClick={() => account.deleteSession("current").then(() => navigate("/"))} className="mt-4 bg-red-500 text-white px-4 py-2 rounded absolute top-4 right-4">
         Logout
       </button>
       <h1 className="text-3xl font-bold mt-4">Edit Note</h1>
       {note && (
-        <div className="w-full max-w-4xl mt-6 shadow-lg p-6 rounded-lg outline-1 outline outline-gray-500">
+        <div className="w-full max-w-4xl mt-6 shadow-lg p-6 rounded-lg outline-1 outline outline-gray-500 ">
           <input
             type="text"
             value={note.Name}
@@ -115,9 +149,9 @@ function EditScreen() {
             placeholder="Description"
           />
           <textarea
-            value={note.Content}
-            onChange={(e) => setNote({ ...note, Content: e.target.value })}
-            className="w-full p-2 mb-4 border rounded"
+            value={editableContent}
+            onChange={handleContentChange}
+            className="w-full p-2 mb-4 border rounded min-h-[200px]"
             placeholder="Content"
           />
           <input

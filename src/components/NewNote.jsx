@@ -8,6 +8,7 @@ import { Editor, Transforms, createEditor, Element as SlateElement } from 'slate
 import { AiOutlinePlus } from "react-icons/ai";
 import { withHistory } from 'slate-history';
 import { Bold, Italic, Underline, Strikethrough } from 'lucide-react';
+
 const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID; // Replace with your actual Database ID
 const COLLECTION_ID = import.meta.env.VITE_APPWRITE_COLLECTION_ID; // Replace with your actual Collection ID
 
@@ -90,7 +91,7 @@ const NewNote = () => {
     }, []);
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
+        e.preventDefault(); // Prevent default form submission behavior
         try {
             const result = await databases.createDocument(
                 DATABASE_ID,
