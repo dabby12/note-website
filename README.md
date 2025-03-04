@@ -25,8 +25,14 @@ This is a Vite + React project that includes various features such as user authe
 
 3. Create a `.env` file in the root directory and add your Appwrite project details:
     ```env
-    VITE_APPWRITE_ENDPOINT=https://cloud.appwrite.io/v1
-    VITE_APPWRITE_PROJECT_ID=your_project_id
+    VITE_APPWRITE_ENDPOINT=
+    VITE_APPWRITE_PROJECT_ID=
+    VITE_APPWRITE_DATABASE_ID=
+    VITE_APPWRITE_COLLECTION_ID=
+    VITE_APPWRITE_PREF_COLLECTION_ID=
+    VITE_APPWRITE_PROFILE_PICTURE_BUCKET_ID=
+
+
     ```
 
 4. Start the development server:
