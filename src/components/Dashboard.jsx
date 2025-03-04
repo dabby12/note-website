@@ -230,7 +230,7 @@ const Dashboard = () => {
                   )}
                 </div>
   
-                <div className="bg-white rounded-lg text-black border border-gray-300 overflow-hidden">
+                <div className="bg-white rounded-lg text-black border border-gray-300 overflow-hidden w-64 h-auto">
                   <li className="p-2 border-b m-2 font-bold">{doc.Name}</li>
                   <li className="p-2 border-b rounded-md">{doc.Description}</li>
                   <li className="p-2 border-b">{renderContent(doc.Content)}</li>
@@ -245,7 +245,7 @@ const Dashboard = () => {
                         {doc.tags.map((tag, index) => (
                           <li
                             key={index}
-                            className="bg-gray-200 text-sm px-3 py-1 rounded-full text-gray-700"
+                            className="bg-gray-200 text-sm px-3 py-1 rounded-full text-gray-700 hover:bg-blue-300 transition duration-300"
                           >
                             {tag}
                           </li>

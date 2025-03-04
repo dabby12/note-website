@@ -16,6 +16,7 @@ import LandingPage from "./components/LandingPage/LandingPage"
 
 
 function App() {
+  console.log("add 3d scene");
   return (
     <Router>
       <Routes>
@@ -33,7 +34,7 @@ function App() {
         <Route path="/settings/account/:userid" element={<UserAccount />} />
         <Route path="/settings/preferences/:userid" element={<AppPreferences />} />
         <Route path="/settings/privacy/:userid" element={<PrivacySecurity />} />
-
+        
       </Routes>
     </Router>
   );
