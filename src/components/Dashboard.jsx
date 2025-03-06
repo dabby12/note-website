@@ -207,8 +207,8 @@ const Dashboard = () => {
                   
   console.error("FIX EDITSCREEN RENDER")
   return (
-    <div className="flex flex-col items-center h-screen">
-      <h1 className="text-3xl font-bold mt-4 animate-fade-in">Welcome, {user?.name}!</h1>
+    <div className="flex flex-col items-center h-screen bg-light-blue-50">
+      <h1 className="text-3xl font-bold mt-4 animate-fade-in text-light-blue-800">Welcome, {user?.name}!</h1>
       <h2 className="text-xl font-semibold mt-6 animate-fade-in">Your notes:</h2>
   
       <div className="flex flex-row items-start justify-center flex-grow flex-wrap">
@@ -230,7 +230,7 @@ const Dashboard = () => {
                   )}
                 </div>
   
-                <div className="bg-white rounded-lg text-black border border-gray-300 overflow-hidden w-64 h-auto">
+                <div className="bg-light-blue-100 rounded-lg text-black border border-gray-400 overflow-hidden w-64 h-auto">
                   <li className="p-2 border-b m-2 font-bold">{doc.Name}</li>
                   <li className="p-2 border-b rounded-md">{doc.Description}</li>
                   <li className="p-2 border-b">{renderContent(doc.Content)}</li>
@@ -270,8 +270,8 @@ const Dashboard = () => {
         </ul>
       </div>
   
-      <a className="fixed bottom-4 right-4 text-blue-500 transition duration-300 transform hover:scale-110" href="/new">
-        <FaPen className="text-3xl text-blue-500" />
+      <a className="fixed bottom-4 right-4 bg-blue-500 p-3 rounded-full shadow-lg text-white hover:bg-blue-600 transition transform hover:scale-110" href="/new">
+        <FaPen className="text-2xl" />
       </a>
   
       {selectedDocuments.length > 1 && (

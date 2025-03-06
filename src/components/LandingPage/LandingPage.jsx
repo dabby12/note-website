@@ -68,7 +68,7 @@ function LandingPage() {
   const screenshotInView = useInView(screenshotRef, { once: true, amount: 0.2 });
 
   return (
-    <div className="flex flex-col items-center min-h-screen bg-gradient-to-b from-light-blue-100 to-white text-black px-6">
+    <div className="flex flex-col items-center min-h-screen bg-gradient-to-b from-light-blue-200 via-neutral-100 to-light-green-100 text-black px-6">
       {/* Navigation Bar */}
       <nav className="w-full max-w-6xl flex justify-between items-center py-6">
         <motion.div

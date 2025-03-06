@@ -1,96 +1,44 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import miku from "../../assets/miku.jpg"
-import Sidebar from '../Special/Sidebar'
-import { useState, useEffect } from 'react'
-import { account } from "../../api/appwrite.cjs"
-import { databases,  } from "../../api/appwrite.cjs"
-import { Query } from "appwrite"
-import { Users } from 'lucide-react'
-const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID
-const COLLECTION_ID = import.meta.env.VITE_APPWRITE_COLLECTION_ID
-const PREFS_COLLECTION_ID = import.meta.env.VITE_APPWRITE_PREFS_COLLECTION_ID
+import { account, storage, ID } from "../../api/appwrite.cjs"
+
 function UserAccount() {
-    const [userID, setUserID] = useState()
-    const [NotesID, setNotesID] = useState(null);
-    const getUserData = async () => {
-        const userdata = await account.get()
-        console.log(userdata)
-        setUserID(userdata.$id)
-        
-        console.log(userdata.$id)
-    }
-    useEffect(() => {
-        getUserData()
-    }, [])
-    console.log(userID)
-    const [notesIDs, setNotesIDs] = useState([]);
-    
-    const listDocuments = async () => {
+    const [userID, setUserID] = useState("");
+    const [profilePicture, setProfilePicture] = useState("");
+    const getUserID = async () => {
         try {
-            const documents = await databases.listDocuments(DATABASE_ID, COLLECTION_ID, [
-                Query.equal("userID", [userID]), // Fetch documents by user ID
-            ]);
+            const userData = await account.get();
+            setUserID(userData.$id);
+            console.log(userID);
+        } catch (error) {
+            console.log(error);
+        }
+    }
+useEffect(() => {
+    getUserID();
+}, []);
+    const newProfilePicture = async () => {
+        try {
             
-            // Extract all document IDs and save them in array
-            const ids = documents.documents.map(doc => doc.$id);
-            setNotesIDs(ids);
-            console.log(notesIDs, "notesIDs");
         } catch (error) {
-            console.error("Error fetching documents:", error);
-        }
-    }
-    
 
-    useEffect(() => {
-        if (userID) {
-            listDocuments();
         }
-    }, [userID]);
-    const deleteDocumentsAlongWithAccount = async () => {
-        try {
-            for (const docID of notesIDs) {
-                await databases.deleteDocument(DATABASE_ID, COLLECTION_ID, docID);
-            }
-            console.log("notes deleted");
-        } catch (error) {
-            alert("Error deleting account: " + error.message);
+
     }
+  return (
+    <div>
+        <form>
+            
+        </form>
+      <h2 className="text-xl font-bold mt-4">User Account</h2>
+      <p className="text-gray-600">Manage your account settings.</p>
+      <img 
+        src={miku}
+        alt="Miku"
+        className="w-32 h-32 rounded-full mt-4"
+      />
+    </div>
+  )
 }
 
-    const deleteAccount = async () => {
-        try {
-            await Users.delete(userID);
-            await deleteDocumentsAlongWithAccount();
-            alert("Account deleted successfully!");
-
-        } catch (error) {
-            alert("Error deleting account: " + error.message);
-        }
-
-    }
-    return (
-        <div>
-            <Sidebar />
-            <div className="flex flex-col items-center justify-center">
-                <img src={miku} alt="miku" className="w-32 h-32 rounded-full" />
-                <button 
-                    onClick={deleteAccount} 
-                    className='bg-red-500 text-white px-4 py-2 rounded-lg mt-4' 
-                >
-                    Delete account
-                </button>
-                <button 
-                    onClick={listDocuments} 
-                    className='bg-blue-500 text-white px-4 py-2 rounded-lg mt-4'
-                >
-                    List Documents
-                </button>
-                <button onClick={deleteDocumentsAlongWithAccount} className='bg-red-500 text-white px-4 py-2 rounded-lg mt-4'> 
-                    Delete test
-                </button>
-            </div>
-        </div>
-    )
-}
-
-export default UserAccount
+export default UserAccount;

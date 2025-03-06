@@ -49,7 +49,7 @@ const Login = () => {
 
     return (
         <div className="flex justify-center items-center h-screen bg-cover bg-center" style={{ backgroundImage: "url('https://picsum.photos/3600/2400')" }}>
-            <div className="w-full max-w-md bg-white p-8 rounded-xl shadow-xl relative">
+            <div className="w-full max-w-md p-8 rounded-xl shadow-xl relative bg-light-blue-50 hover:bg-light-blue-100 transition duration-300">
                 <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">Login</h2>
 
                 {error && (
@@ -68,7 +68,7 @@ const Login = () => {
                             id="email"
                             type="email"
                             placeholder="Email"
-                            className="p-3 border rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="p-3 border rounded w-full focus:outline-none focus:ring-2 focus:ring-light-green-200"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             required

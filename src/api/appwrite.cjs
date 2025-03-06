@@ -13,3 +13,5 @@ export const query = Query; // Fixed export for Query (no need to instantiate it
 export const { create, update, listDocuments, getDocument, deleteDocument } = databases;
 export const { get, updateEmail, updatePassword, deleteSession } = account;
 export const { createFile, getFilePreview, deleteFile } = storage; // Export storage functions
+export { ID }; // Export ID for generating unique IDs
+    
