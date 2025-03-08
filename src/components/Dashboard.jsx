@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { account, databases } from "../api/appwrite.cjs";
+import { account, databases } from "../api/appwrite.config.js";
 import { useNavigate } from "react-router-dom";
 import { MdEdit } from "react-icons/md";
 import { FaPen, FaRegCircle } from "react-icons/fa6";
@@ -205,7 +205,7 @@ const Dashboard = () => {
     }
   }
                   
-  console.error("FIX EDITSCREEN RENDER")
+
   return (
     <div className="flex flex-col items-center h-screen bg-light-blue-50">
       <h1 className="text-3xl font-bold mt-4 animate-fade-in text-light-blue-800">Welcome, {user?.name}!</h1>

@@ -70,43 +70,44 @@ function LandingPage() {
   return (
     <div className="flex flex-col items-center min-h-screen bg-gradient-to-b from-light-blue-200 via-neutral-100 to-light-green-100 text-black px-6">
       {/* Navigation Bar */}
-      <nav className="w-full max-w-6xl flex justify-between items-center py-6">
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5 }}
-          className="text-3xl font-bold text-light-blue-700 flex items-center"
-        >
-          <CheckCircleIcon className="mr-2" /> InkNote
-        </motion.div>
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="space-x-6 hidden md:flex"
-        >
-          {['Features', 'Pricing', 'FAQ'].map((item) => (
-            <a 
-              key={item} 
-              href={`#${item.toLowerCase()}`} 
-              className="text-light-blue-600 hover:text-light-blue-800 transition-colors font-medium"
-            >
-              {item}
-            </a>
-          ))}
-        </motion.div>
-        <motion.a
-          href="/login"
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          transition={{ duration: 0.3 }}
-          className="bg-light-blue-700 text-white px-5 py-2 rounded-full hover:bg-light-blue-800 transition-colors"
-        >
-          Login
-        </motion.a>
-      </nav>
+        <nav className="w-full max-w-6xl flex justify-between items-center py-6">
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5 }}
+            className="text-3xl font-bold text-light-blue-700 flex items-center"
+          >
+            <CheckCircleIcon className="mr-2" /> InkNote
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="space-x-6 hidden md:flex items-center justify-center flex-1"
+          >
+            {['Features', 'Pricing', 'FAQ'].map((item) => (
+          <a 
+          
+            key={item} 
+            href={`/${item.toLowerCase()}`} 
+            className="text-light-blue-900 hover:text-light-blue-800 transition-colors font-medium flex items-center justify-center"
+          >
+            {item}
+          </a>
+            ))}
+          </motion.div>
+          <motion.a
+            href="/login"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            transition={{ duration: 0.3 }}
+            className="bg-light-blue-700 text-white px-5 py-2 rounded-full hover:bg-light-blue-800 transition-colors"
+          >
+            Login
+          </motion.a>
+        </nav>
 
-      {/* Hero Section */}
+        {/* Hero Section */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { account } from "../api/appwrite.cjs";
+import { account } from "../api/appwrite.config"
 import { useNavigate } from "react-router-dom";
 import Google from "../assets/google.svg";
 import Images from "./Images";

@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { MdAccountCircle } from "react-icons/md";
 import { RiListSettingsFill } from "react-icons/ri";
 import { FaShieldAlt } from "react-icons/fa";
-import { account } from "../../api/appwrite.cjs";
+import { account } from "../../api/appwrite.config.js";
 import { ToastContainer, toast } from 'react-toastify';
 import { useNavigate } from "react-router-dom"; // Use `useNavigate` instead of `navigate`
 

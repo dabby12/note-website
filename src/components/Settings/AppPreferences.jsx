@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { databases, account } from "../../api/appwrite.cjs";
+import { databases, account } from "../../api/appwrite.config.js";
 import { Query, ID } from "appwrite";
 import { toast } from "react-toastify";
 import { MdKeyboardBackspace } from "react-icons/md";

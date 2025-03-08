@@ -1,7 +1,7 @@
 // src/components/EditScreen.jsx
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { account, databases } from '../api/appwrite.cjs';
+import { account, databases } from '../api/appwrite.config.js';
 import { Save, Trash2, X } from 'lucide-react';
 import { AiOutlinePlus } from "react-icons/ai";
 

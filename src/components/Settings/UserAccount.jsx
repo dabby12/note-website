@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import miku from "../../assets/miku.jpg"
-import { account, storage, ID } from "../../api/appwrite.cjs"
+import { account, storage, ID } from "../../api/appwrite.config.js"
 
 function UserAccount() {
     const [userID, setUserID] = useState("");

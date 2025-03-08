@@ -13,8 +13,8 @@ import UserAccount from "./components/Settings/UserAccount";
 import AppPreferences from "./components/Settings/AppPreferences";
 import PrivacySecurity from "./components/Settings/PrivacySecurity";
 import LandingPage from "./components/LandingPage/LandingPage"
-
-
+import Pricing from "./components/LandingPage/Pricing"
+import Features from "./components/LandingPage/Features"
 function App() {
   console.log("add 3d scene");
   return (
@@ -34,6 +34,8 @@ function App() {
         <Route path="/settings/account/:userid" element={<UserAccount />} />
         <Route path="/settings/preferences/:userid" element={<AppPreferences />} />
         <Route path="/settings/privacy/:userid" element={<PrivacySecurity />} />
+        <Route path="/pricing" element={<Pricing />} />
+        <Route path="/features" element={<Features />} />
         
       </Routes>
     </Router>

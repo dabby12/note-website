@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Sidebar from '../components/Special/Sidebar';
 import { ToastContainer, toast } from 'react-toastify';
-import { account } from '../api/appwrite.cjs';
+import { account } from '../api/appwrite.config.js';
 
 function Settings({ userData }) {
     const navigate = useNavigate();
