@@ -13,7 +13,7 @@ const features = [
     description: "Sync your notes across all devices instantly with our cloud integration."
   },
   {
-    icon: <ShieldCheckIcon className="w-12 h-12 text-light-blue-700" />, 
+    icon: <ShieldCheckIcon className="w-12 h-12 text-light-purple-500" />, 
     title: "Secure & Private", 
     description: "End-to-end encryption ensures your notes remain safe and private."
   }
@@ -21,7 +21,7 @@ const features = [
 
 function Features() {
   return (
-    <section className="bg-gradient-to-br from-neutral-50 via-light-blue-50 to-light-green-50 dark:from-dark-800 dark:via-dark-700 dark:to-dark-600 py-24 px-6">
+    <section className="bg-gradient-to-br from-neutral-50 via-light-blue-50 to-light-green-50 dark:from-dark-800 dark:via-dark-700 dark:to-dark-600 py-24 px-6 w-full h-max">
       <div className="max-w-7xl mx-auto">
         <motion.div 
           initial={{ opacity: 0 }}
@@ -49,7 +49,11 @@ function Features() {
               whileHover={{ y: -8, transition: { duration: 0.3 } }}
               className="p-8 bg-white dark:bg-dark-600 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-transparent hover:border-light-blue-200 dark:hover:border-light-blue-700"
             >
-              <div className="flex justify-center mb-6 bg-gradient-to-r from-light-blue-50 to-light-green-50 dark:from-dark-500 dark:to-dark-400 p-4 rounded-full w-20 h-20 mx-auto">
+              <div className={`flex justify-center mb-6 p-4 rounded-full w-20 h-20 mx-auto ${
+                index === 0 ? "bg-light-blue-50 dark:bg-dark-500" : 
+                index === 1 ? "bg-light-green-50 dark:bg-dark-500" :
+                "bg-light-purple-50 dark:bg-dark-500"
+              }`}>
                 {feature.icon}
               </div>
               <h3 className="text-2xl font-bold text-neutral-800 dark:text-neutral-100 mb-3">
@@ -69,7 +73,7 @@ function Features() {
           transition={{ delay: 0.6 }}
           className="mt-16 text-center"
         >
-          <a href="/signup" className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-light-blue-500 to-light-green-500 hover:from-light-blue-600 hover:to-light-green-600 text-white font-medium rounded-lg transition-colors duration-300">
+          <a href="/signup" className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-light-blue-500 to-light-green-500 hover:from-light-blue-600 hover:to-light-green-600 text-white font-medium rounded-lg transition-colors duration-300 animate-pulse-fast">
             Ready to start? 
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
