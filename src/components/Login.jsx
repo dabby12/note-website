@@ -4,6 +4,9 @@ import { useNavigate } from "react-router-dom";
 import Google from "../assets/google.svg";
 import Images from "./Images";
 import { OAuthProvider } from "appwrite"
+import BG from "../assets/wallpaper-notessite.jpg";
+
+import { useEffect } from "react";
 const Login = () => {
     const navigate = useNavigate();
     const [email, setEmail] = useState("");
@@ -12,7 +15,7 @@ const Login = () => {
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
     const [rememberMe, setRememberMe] = useState(false);
-
+    const [domain, setDomain] = useState("test");
     // Handle Login with Email & Password
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -28,15 +31,25 @@ const Login = () => {
             setLoading(false);
         }
     };
-
+    const getCurrentDomain = () => {
+        const domain = window.location.origin;
+        console.log(domain);
+        setDomain(domain);
+        
+        return domain;
+    }
+    useEffect(() => {
+        getCurrentDomain();
+    }, []);
     // Handle Login with Google OAuth
     const handleGoogleLogin = async () => {
         setLoading(true);
         try {
+            const domain = getCurrentDomain();
             await account.createOAuth2Session(
                 OAuthProvider.Google,
-                "http://localhost:5173/dashboard", // Redirect on success
-                "http://localhost:5173/login"  // Redirect on failure
+                `${getCurrentDomain()}/dashboard`,
+                `${getCurrentDomain()}/login`
             );
             navigate("/dashboard");
         } catch (error) {
@@ -48,7 +61,12 @@ const Login = () => {
     };
 
     return (
-        <div className="flex justify-center items-center h-screen bg-cover bg-center" style={{ backgroundImage: "url('https://picsum.photos/3600/2400')" }}>
+        <div className="flex justify-center items-center h-screen bg-cover bg-center">
+            <img
+                src={BG}
+                alt="Background" 
+                className="absolute inset-0 w-full h-full object-cover"
+            /> 
             <div className="w-full max-w-md p-8 rounded-xl shadow-xl relative bg-light-blue-50 hover:bg-light-blue-100 transition duration-300">
                 <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">Login</h2>
 
