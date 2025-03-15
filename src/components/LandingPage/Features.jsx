@@ -1,88 +1,83 @@
-import { motion } from "framer-motion";
-import { CheckCircleIcon, LightningBoltIcon, ShieldCheckIcon } from "@heroicons/react/outline";
-
+import { CheckCircle, Pencil, Cloud, Lock, Layers } from "lucide-react";
+import { DiOpensource } from "react-icons/di";
+import { MdOutlineKeyboardBackspace } from "react-icons/md";
 const features = [
   {
-    icon: <CheckCircleIcon className="w-12 h-12 text-light-blue-500" />, 
-    title: "Seamless Note-Taking", 
-    description: "Capture and organize notes effortlessly with our intuitive interface."
+    icon: <Pencil size={40} className="text-light-purple-500" />, 
+    title: "Easy Note-Taking",
+    description: "Create, edit, and format notes effortlessly with our intuitive editor.",
   },
   {
-    icon: <LightningBoltIcon className="w-12 h-12 text-light-green-500" />, 
-    title: "Lightning Fast Sync", 
-    description: "Sync your notes across all devices instantly with our cloud integration."
+    icon: <Cloud size={40} className="text-light-blue-500" />, 
+    title: "Cloud Sync",
+    description: "Access your notes from anywhere with real-time cloud synchronization.",
   },
   {
-    icon: <ShieldCheckIcon className="w-12 h-12 text-light-purple-500" />, 
-    title: "Secure & Private", 
-    description: "End-to-end encryption ensures your notes remain safe and private."
+    icon: <Lock size={40} className="text-light-coral-500" />, 
+    title: "Secure & Private",
+    description: "Your notes are encrypted and protected to ensure your privacy.",
+  },
+  {
+    icon: <Layers size={40} className="text-light-green-500" />, 
+    title: "Organized Structure",
+    description: "Keep your notes neatly structured with folders and tags.",
+  },
+  {
+    icon: <CheckCircle size={40} className="text-light-amber-500" />, 
+    title: "Task Integration",
+    description: "Manage to-dos and set reminders within your notes.",
+  },
+  {
+    icon: <DiOpensource size={40} className="text-light-purple-500" />, 
+    title: "Open Source",
+    description: "Built on open-source technologies to ensure transparency and security.",
+
   }
 ];
 
 function Features() {
   return (
-    <section className="bg-gradient-to-br from-neutral-50 via-light-blue-50 to-light-green-50 dark:from-dark-800 dark:via-dark-700 dark:to-dark-600 py-24 px-6 w-full h-max">
-      <div className="max-w-7xl mx-auto">
-        <motion.div 
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-          className="text-center mb-16"
-        >
-          <h2 className="text-4xl md:text-5xl font-bold text-neutral-800 dark:text-neutral-100 mb-6">
-            Powerful Features, <span className="text-light-blue-500 dark:text-light-blue-300">Seamless</span> Experience
-          </h2>
-          <p className="text-lg md:text-xl text-neutral-600 dark:text-neutral-300 max-w-3xl mx-auto">
-            Everything you need to streamline your workflow and boost productivity.
-          </p>
-        </motion.div>
-        
-        <div className="grid gap-8 sm:grid-cols-2 md:grid-cols-3">
+    <section className="bg-gradient-to-br from-light-blue-100 to-light-purple-200 dark:from-dark-700 dark:to-dark-900 min-h-screen py-20 px-6 sm:px-12 text-center">
+      <h1 className="relative group">
+        <a href="/" className="fixed top-0 left-0 mt-4 ml-4 flex flex-col items-center">
+          <MdOutlineKeyboardBackspace className="w-12 h-12 text-light-coral-500 dark:text-light-blue-500" />
+          <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-light-coral-500 dark:text-light-blue-500 bg-light-blue-600 dark:bg-light-coral-800 font-semibold px-2 py-1 rounded-full text-sm">
+            Go back
+          </span>
+        </a>
+      </h1>
+      <span className="text-xl font-bold text-dark-900 dark:text-neutral-100 ">
+        Welcome to Our Features
+      </span>
+
+      <div className="max-w-4xl mx-auto">
+        <h2 className="text-4xl font-bold text-dark-900 dark:text-neutral-100 mb-6">
+          Powerful Features for Productivity
+        </h2>
+        <p className="text-dark-500 dark:text-neutral-300 mb-12">
+          Everything you need to stay organized, focused, and efficient.
+        </p>
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {features.map((feature, index) => (
-            <motion.div 
-              key={index} 
-              initial={{ opacity: 0, y: 30 }} 
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: index * 0.2 }}
-              whileHover={{ y: -8, transition: { duration: 0.3 } }}
-              className="p-8 bg-white dark:bg-dark-600 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-transparent hover:border-light-blue-200 dark:hover:border-light-blue-700"
+            <div
+              key={index}
+              className="p-6 bg-white dark:bg-dark-700 shadow-lg rounded-2xl flex flex-col items-center hover:scale-105 transition-transform"
             >
-              <div className={`flex justify-center mb-6 p-4 rounded-full w-20 h-20 mx-auto ${
-                index === 0 ? "bg-light-blue-50 dark:bg-dark-500" : 
-                index === 1 ? "bg-light-green-50 dark:bg-dark-500" :
-                "bg-light-purple-50 dark:bg-dark-500"
-              }`}>
-                {feature.icon}
-              </div>
-              <h3 className="text-2xl font-bold text-neutral-800 dark:text-neutral-100 mb-3">
+              <div className="mb-4">{feature.icon}</div>
+              <h3 className="text-xl font-semibold text-dark-800 dark:text-neutral-100 mb-2">
                 {feature.title}
               </h3>
-              <p className="text-neutral-600 dark:text-neutral-300">
+              <p className="text-dark-500 dark:text-neutral-300">
                 {feature.description}
               </p>
-            </motion.div>
+            </div>
           ))}
         </div>
-        
-        <motion.div 
-          initial={{ opacity: 0 }}  
-          whileInView={{ opacity: 1 }} 
-          viewport={{ once: true }}
-          transition={{ delay: 0.6 }}
-          className="mt-16 text-center"
-        >
-          <a href="/signup" className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-light-blue-500 to-light-green-500 hover:from-light-blue-600 hover:to-light-green-600 text-white font-medium rounded-lg transition-colors duration-300 animate-pulse-fast">
-            Ready to start? 
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
-            </svg>
-          </a>
-        </motion.div>
       </div>
+      <button className="mt-12 bg-light-amber-500 text-white py-3 px-6 rounded-full font-semibold hover:bg-light-amber-600 transition-colors">
+        Ready to start? Sign up now!
+      </button>
     </section>
   );
 }
-
 export default Features;

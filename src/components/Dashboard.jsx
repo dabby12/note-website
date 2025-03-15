@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { account, databases } from "../api/appwrite.config.js";
+import { account, databases, } from "../api/appwrite.config.js";
 import { useNavigate } from "react-router-dom";
 import { MdEdit } from "react-icons/md";
 import { FaPen, FaRegCircle } from "react-icons/fa6";
@@ -14,13 +14,12 @@ import {
   MenuHandler,
   MenuList,
   MenuItem,
-} from "@material-tailwind/react";  
+} from "@material-tailwind/react";
 import { GrLogout } from "react-icons/gr";
+
 const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID; // Replace with your actual Database ID
 const COLLECTION_ID = import.meta.env.VITE_APPWRITE_COLLECTION_ID; // Replace with your actual Collection ID
 const PREF_COLLECTION_ID = import.meta.env.VITE_APPWRITE_PREF_COLLECTION_ID;
-// Function to get user data
-
 
 const Dashboard = () => {
   const [user, setUser] = useState(null); // State to store user data
@@ -28,7 +27,8 @@ const Dashboard = () => {
   const [selectedDocuments, setSelectedDocuments] = useState([]); // State to store selected documents
   const navigate = useNavigate(); // Hook to navigate between routes
   const [preferences, setPreferences] = useState([]); // State to store preferences
-  // Effect to check user authentication
+
+  // Function to get user data
   const GetUserData = async (setUser) => {
     try {
       const userData = await account.get();
@@ -41,6 +41,8 @@ const Dashboard = () => {
       return null;
     }
   };
+
+  // Effect to check user authentication
   useEffect(() => {
     const checkUser = async () => {
       try {
@@ -97,7 +99,7 @@ const Dashboard = () => {
         : [...prevSelected, docId]
     );
   };
-    
+
   // Function to delete multiple selected documents
   const MassDelete = async () => {
     alert("Are you sure you want to delete these documents?");
@@ -151,8 +153,10 @@ const Dashboard = () => {
     }
     return <p>{content}</p>;
   };
+
+  // Function to create user preferences
   const createPrefs = async () => {
-    const userID = localStorage.getItem('user').$id;
+    const userID = JSON.parse(localStorage.getItem('user')).$id;
     try {
       await databases.createDocument(
         DATABASE_ID,
@@ -169,48 +173,53 @@ const Dashboard = () => {
       console.error("Error creating preferences:", error);
     }
   };
+
+  // Function to fetch user preferences
   const fetchPrefs = async () => {
     try {
       const response = await databases.listDocuments(
-        DATABASE_ID, 
-        PREF_COLLECTION_ID, 
+        DATABASE_ID,
+        PREF_COLLECTION_ID,
         [Query.equal("userid", user.$id)]
       );
       setPreferences(response.documents);
       if (response.documents.length === 0) {
         createPrefs();
       } else {
-
         console.log("Preferences fetched successfully:", response.documents);
       }
     } catch (error) {
       console.error("Error fetching preferences:", error);
     }
-  }
+  };
+
+  // Effect to fetch preferences
   useEffect(() => {
     if (user) {
       fetchPrefs();
     }
   }, [user]);
+
+  // Function to handle settings navigation
   const handleSettings = async () => {
     try {
       const userData = await GetUserData();
       if (userData) {
-      const userData = await GetUserData(setUser);
-      } else {
         navigate(`/settings/${preferences[0].$id}`);
       }
     } catch (error) {
       navigate("/");
     }
-  }
-                  
+  };
+
+
+
 
   return (
     <div className="flex flex-col items-center h-screen bg-light-blue-50">
       <h1 className="text-3xl font-bold mt-4 animate-fade-in text-light-blue-800">Welcome, {user?.name}!</h1>
       <h2 className="text-xl font-semibold mt-6 animate-fade-in">Your notes:</h2>
-  
+
       <div className="flex flex-row items-start justify-center flex-grow flex-wrap">
         <ul className="mt-4 px-2 flex flex-row flex-wrap rounded-lg">
           {documents.length > 0 ? (
@@ -229,14 +238,14 @@ const Dashboard = () => {
                     <FaRegCircle className="text-gray-500 text-lg" />
                   )}
                 </div>
-  
+
                 <div className="bg-light-blue-100 rounded-lg text-black border border-gray-400 overflow-hidden w-64 h-auto">
                   <li className="p-2 border-b m-2 font-bold">{doc.Name}</li>
                   <li className="p-2 border-b rounded-md">{doc.Description}</li>
                   <li className="p-2 border-b">{renderContent(doc.Content)}</li>
                   <li className="p-2 border-b">{formatDate(doc.Date)}</li>
                   <li className="p-2 border-b">{doc.$id}</li>
-  
+
                   {/* Display tags only if there are any */}
                   {doc.tags && doc.tags.length > 0 && (
                     <div className="p-2 border-b">
@@ -253,7 +262,7 @@ const Dashboard = () => {
                       </ul>
                     </div>
                   )}
-  
+
                   {/* Edit button */}
                   <button
                     className="p-2 bg-blue-500 text-white hover:bg-blue-600 transition duration-300 rounded-b-lg w-full mt-4 flex items-center justify-center"
@@ -269,11 +278,11 @@ const Dashboard = () => {
           )}
         </ul>
       </div>
-  
+
       <a className="fixed bottom-4 right-4 bg-blue-500 p-3 rounded-full shadow-lg text-white hover:bg-blue-600 transition transform hover:scale-110" href="/new">
         <FaPen className="text-2xl" />
       </a>
-  
+
       {selectedDocuments.length > 1 && (
         <button
           onClick={MassDelete}
@@ -282,7 +291,7 @@ const Dashboard = () => {
           <MdDelete className="mr-2" /> Delete all selected
         </button>
       )}
-  
+
       {selectedDocuments.length === 1 && (
         <button
           onClick={() => Delete(selectedDocuments[0])}
@@ -291,7 +300,7 @@ const Dashboard = () => {
           <MdDelete className="mr-2" /> Delete
         </button>
       )}
-  
+
       <Menu>
         <MenuHandler>
           <img
@@ -309,11 +318,10 @@ const Dashboard = () => {
           </MenuItem>
         </MenuList>
       </Menu>
-  
+
       <ToastContainer />
     </div>
   );
-  
-}  
+};
 
 export default Dashboard;

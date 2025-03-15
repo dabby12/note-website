@@ -80,7 +80,7 @@ function Pricing() {
         </div>
       </div>
 
-      <div className="mx-auto mt-16 grid max-w-lg grid-cols-1 items-center gap-y-6 sm:mt-20 lg:max-w-6xl lg:grid-cols-3">
+      <div className="mx-auto mt-16 grid max-w-lg grid-cols-1 items-center gap-y-6 sm:mt-20 lg:max-w-6xl lg:grid-cols-3" >
         {tiers.map((tier) => (
           <div
             key={tier.id}

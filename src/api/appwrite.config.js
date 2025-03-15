@@ -1,4 +1,4 @@
-import { Client, Account, Databases, Avatars, Storage, ID, Query } from "appwrite";
+import { Client, Account, Databases, Avatars, Storage, ID, Query,} from "appwrite";
 const endpoint = import.meta.env.VITE_APPWRITE_ENDPOINT;
 const project = import.meta.env.VITE_APPWRITE_PROJECT_ID;
 const client = new Client()
@@ -13,5 +13,6 @@ export const query = Query; // Fixed export for Query (no need to instantiate it
 export const { create, update, listDocuments, getDocument, deleteDocument } = databases;
 export const { get, updateEmail, updatePassword, deleteSession } = account;
 export const { createFile, getFilePreview, deleteFile } = storage; // Export storage functions
-export { ID }; // Export ID for generating unique IDs
+export { ID }; // Export ID for generating unique ID
+
     

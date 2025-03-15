@@ -1,18 +1,67 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, useInView } from 'framer-motion';
-import { 
-  BookOpenIcon, 
-  FolderIcon, 
-  CheckCircleIcon 
-} from 'lucide-react';
-import { FaRegLightbulb } from "react-icons/fa";
+import { BookOpenIcon, FolderIcon, CheckCircleIcon } from 'lucide-react';
+import { FaRegLightbulb } from 'react-icons/fa';
 
+// App Screenshots (Replace with your actual image imports)
+import AppScreenShot1 from '../../assets/app-screenshot1.png';
+import AppScreenShot2 from '../../assets/app-screenshot2.png';
+import AppScreenShot3 from '../../assets/app-screenshot3.png';
 
-// App Screenshots
-import AppScreenShot1 from "../../assets/app-screenshot1.png";
-import AppScreenShot2 from "../../assets/app-screenshot2.png";
-import AppScreenShot3 from "../../assets/app-screenshot3.png";
+// Typewriter Component
+const Typewriter = ({ speed = 100 }) => {
+  const [displayText, setDisplayText] = useState('');
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentWordIndex, setCurrentWordIndex] = useState(0);
+  const [isTypingComplete, setIsTypingComplete] = useState(false);
 
+  const words = [
+    "Unleash Your Productivity  ", // 26 chars
+    "Capture Your Brilliant Ideas   ", // 26 chars
+    "Organize Your Thoughts Easily", // 26 chars
+    "Stay Productive Every Day   ", // 26 chars
+    "Innovate Without Limits     ", // 26 chars
+    "Create Amazing Things       ", // 26 chars
+    "Sync Across All Devices     ", // 26 chars
+    "Boost Your Productivity     "  // 26 chars
+  ];
+
+  useEffect(() => {
+    if (currentIndex < words[currentWordIndex].length) {
+      const timeout = setTimeout(() => {
+        setDisplayText((prev) => prev + words[currentWordIndex][currentIndex]);
+        setCurrentIndex((prev) => prev + 1);
+      }, speed);
+
+      return () => clearTimeout(timeout);
+    } else {
+      // After finishing typing, wait for a moment before clearing the text
+      const clearTimeoutId = setTimeout(() => {
+        setDisplayText('');
+        setCurrentIndex(0);
+        setIsTypingComplete(true);
+      }, 1000); // Adjust the delay before clearing the text (e.g., 1000ms = 1 second)
+
+      return () => clearTimeout(clearTimeoutId);
+    }
+  }, [currentIndex, currentWordIndex, speed, words]);
+
+  useEffect(() => {
+    if (isTypingComplete) {
+      // Move to the next word in the array
+      setCurrentWordIndex((prev) => (prev + 1) % words.length);
+      setIsTypingComplete(false);
+    }
+  }, [isTypingComplete, words.length]);
+
+  return (
+    <div className="inline-block w-full text-center whitespace-nowrap">
+      <div className="inline-block min-w-[24rem] h-12">
+        {displayText}
+      </div>
+    </div>
+  );
+};
 function LandingPage() {
   const [activeScreenshot, setActiveScreenshot] = useState(0);
   const screenshots = [AppScreenShot1, AppScreenShot2, AppScreenShot3];
@@ -20,46 +69,36 @@ function LandingPage() {
   const features = [
     {
       icon: <BookOpenIcon className="w-12 h-12 text-light-blue-600" />,
-      title: "Unlimited Notes",
-      description: "Capture and organize unlimited notes across multiple categories and projects."
+      title: 'Unlimited Notes',
+      description: 'Capture and organize unlimited notes across multiple categories and projects.',
     },
     {
       icon: <FaRegLightbulb className="w-12 h-12 text-light-green-600" />,
-      title: "Smart Organization",
-      description: "AI-powered tagging and smart search to help you find your notes instantly."
+      title: 'Smart Organization',
+      description: 'AI-powered tagging and smart search to help you find your notes instantly.',
     },
     {
       icon: <FolderIcon className="w-12 h-12 text-light-blue-600" />,
-      title: "Cross-Platform Sync",
-      description: "Seamlessly sync your notes across desktop, mobile, and web platforms."
-    }
+      title: 'Cross-Platform Sync',
+      description: 'Seamlessly sync your notes across desktop, mobile, and web platforms.',
+    },
   ];
 
   // Scroll-triggered animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
-    visible: { 
+    visible: {
       opacity: 1,
       transition: {
         staggerChildren: 0.2,
-        delayChildren: 0.2
-      }
-    }
+        delayChildren: 0.2,
+      },
+    },
   };
 
   const itemVariants = {
-    hidden: { 
-      opacity: 0, 
-      y: 50 
-    },
-    visible: { 
-      opacity: 1, 
-      y: 0,
-      transition: {
-        duration: 0.6,
-        ease: "easeOut"
-      }
-    }
+    hidden: { opacity: 0, y: 50 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: 'easeOut' } },
   };
 
   // Refs for scroll-triggered animations
@@ -67,7 +106,11 @@ function LandingPage() {
   const screenshotRef = useRef(null);
   const featuresInView = useInView(featuresRef, { once: true, amount: 0.2 });
   const screenshotInView = useInView(screenshotRef, { once: true, amount: 0.2 });
-
+  const addIfUserUsedFreeTrial = () => {
+    // Add user to the "Free Trial" group if they used the free trial
+    localStorage.setItem("freeTrial", "true");
+    console.log(localStorage.getItem("freeTrial"));
+  }
   return (
     <div className="flex flex-col items-center min-h-screen bg-gradient-to-b from-light-blue-200 via-neutral-100 to-light-green-100 text-black px-6">
       {/* Navigation Bar */}
@@ -87,9 +130,9 @@ function LandingPage() {
           className="space-x-6 hidden md:flex items-center justify-center flex-1"
         >
           {['Features', 'Pricing', 'FAQ'].map((item) => (
-            <a 
-              key={item} 
-              href={`/${item.toLowerCase()}`} 
+            <a
+              key={item}
+              href={`/${item.toLowerCase()}`}
               className="text-light-blue-900 hover:text-light-blue-800 transition-colors font-medium flex items-center justify-center"
             >
               {item}
@@ -115,12 +158,13 @@ function LandingPage() {
         className="text-center max-w-3xl mt-12 px-4"
       >
         <h1 className="text-6xl font-extrabold text-light-blue-800 leading-tight mb-4">
-          Unleash Your Productivity
+          <Typewriter speed={100} />
         </h1>
         <p className="text-xl text-gray-600 mb-8">
-          Transform how you capture, organize, and recall your ideas with InkNote's intelligent note-taking platform.
+          Transform how you capture, organize, and recall your ideas with InkNote's intelligent
+          note-taking platform.
         </p>
-        
+
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -130,6 +174,7 @@ function LandingPage() {
           <a
             href="/signup"
             className="bg-light-blue-700 text-white px-8 py-3 rounded-full text-lg font-semibold hover:bg-light-blue-800 transition-colors shadow-lg"
+            onClick={addIfUserUsedFreeTrial}
           >
             Start Free Trial
           </a>
@@ -142,13 +187,11 @@ function LandingPage() {
         </motion.div>
       </motion.div>
 
-      {/* 3D Scene Section */}
-      
       {/* Features Section */}
-      <motion.section 
+      <motion.section
         ref={featuresRef}
         initial="hidden"
-        animate={featuresInView ? "visible" : "hidden"}
+        animate={featuresInView ? 'visible' : 'hidden'}
         variants={containerVariants}
         className="max-w-6xl mt-16 grid md:grid-cols-3 gap-8 px-4"
       >
@@ -171,7 +214,7 @@ function LandingPage() {
       </motion.section>
 
       {/* App Screenshots */}
-      <motion.section 
+      <motion.section
         ref={screenshotRef}
         initial={{ opacity: 0, y: 50 }}
         animate={screenshotInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
@@ -184,9 +227,7 @@ function LandingPage() {
               key={index}
               onClick={() => setActiveScreenshot(index)}
               className={`w-3 h-3 rounded-full ${
-                activeScreenshot === index 
-                  ? 'bg-light-blue-700' 
-                  : 'bg-gray-300'
+                activeScreenshot === index ? 'bg-light-blue-700' : 'bg-gray-300'
               }`}
             />
           ))}
@@ -206,6 +247,11 @@ function LandingPage() {
       <footer className="mt-16 text-center text-gray-500 text-sm py-6">
         © 2025 InkNote. Empowering Your Creativity.
       </footer>
+      <b>
+        <a href="/terms" className="text-blue-500 hover:text-blue-700 m-4 cursor-pointer">
+          Terms and conditions apply.
+        </a>
+      </b>
     </div>
   );
 }
