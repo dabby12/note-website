@@ -1,44 +1,264 @@
-import React, { useEffect, useState } from 'react'
-import miku from "../../assets/miku.jpg"
-import { account, storage, ID } from "../../api/appwrite.config.js"
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import Sidebar from "../Special/Sidebar.jsx"
+import { ToastContainer, toast } from 'react-toastify';
+import { account } from "../../api/appwrite.config.js"
 
-function UserAccount() {
-    const [userID, setUserID] = useState("");
-    const [profilePicture, setProfilePicture] = useState("");
-    const getUserID = async () => {
+function UserAccount({ userData }) {
+    const navigate = useNavigate();
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [localUserData, setLocalUserData] = useState(null);
+    const randomInt = Math.floor(Math.random() * 10);
+    const SuccessSignOut = () => toast.success('Successfully signed out!');
+    
+    const randomAuthCheck = () => {
+        if (!localStorage.getItem('loggedIn')) {
+            navigate("/");
+        }
+    }
+    console.error(randomInt)
+    if (randomInt === 1) {
+        console.log("Random integer is 1, redirecting to login.");
+        randomAuthCheck();
+    }
+    const getUser = async () => {
         try {
             const userData = await account.get();
-            setUserID(userData.$id);
-            console.log(userID);
-        } catch (error) {
-            console.log(error);
+            setEmail(userData.email);
+            setLocalUserData(userData);
+            console.log("User data:", userData);
+            if (!userData.passwordUpdate) {
+                console.log("User does not have a password, prompt to set one.");
+              } else {
+                console.log("User already has a password.");
+            }
+
+            setEmail(userData.email);
+        } catch(error) {
+            console.error("Failed to fetch user data:", error);
+            
         }
-    }
-useEffect(() => {
-    getUserID();
-}, []);
-    const newProfilePicture = async () => {
+    };
+
+    useEffect(() => {
+        getUser();
+    }, []);
+
+    const handleLogout = async () => {
         try {
-            
+            await account.deleteSession("current");
+            localStorage.removeItem('loggedIn');
+            SuccessSignOut();
+            setTimeout(() => {
+                navigate("/"); // Redirect to login after logout
+            }, 500); // Wait for 1 second before redirecting
         } catch (error) {
-
+            console.error("Failed to logout:", error);
         }
+    };
+
+    const updateEmail = async () => {
+        if (!password) {
+            toast.error("Please enter your password to update the email.");
+            return;
+        }
+        try {
+            await account.updateEmail(email, password);
+            toast.success("Email updated successfully");
+            setEmail('');
+            setPassword('');
+        } catch (error) {
+            console.error("Failed to update email:", error);
+            toast.error("Failed to update email");
+        }
+    };
+
+    const updatePassword = async () => {
+        if (!password) {
+            toast.error("Please enter a new password.");
+            return;
+        }
+        try {
+            await account.updatePassword(password);
+            toast.success("Password updated successfully");
+            setPassword('');
+            reload();
+        } catch (error) {
+            console.error("Failed to update password:", error);
+            toast.error("Failed to update password", error);
+        }
+    };
+console.log(`
+    
+░█████╗░██████╗░░█████╗░██╗░░██╗  ██╗░░░░░██╗███╗░░██╗██╗░░░██╗██╗░░██╗
+██╔══██╗██╔══██╗██╔══██╗██║░░██║  ██║░░░░░██║████╗░██║██║░░░██║╚██╗██╔╝
+███████║██████╔╝██║░░╚═╝███████║  ██║░░░░░██║██╔██╗██║██║░░░██║░╚███╔╝░
+██╔══██║██╔══██╗██║░░██╗██╔══██║  ██║░░░░░██║██║╚████║██║░░░██║░██╔██╗░
+██║░░██║██║░░██║╚█████╔╝██║░░██║  ███████╗██║██║░╚███║╚██████╔╝██╔╝╚██╗
+╚═╝░░╚═╝╚═╝░░╚═╝░╚════╝░╚═╝░░╚═╝  ╚══════╝╚═╝╚═╝░░╚══╝░╚═════╝░╚═╝░░╚═╝
+`);
+console.log("                   -`");
+console.log("                  .o+`");
+console.log("                 `ooo/");
+console.log("                `+oooo:");
+console.log("               `+oooooo:");
+console.log("               -+oooooo+:");
+console.log("             `/:-:++oooo+:");
+console.log("            `/++++/+++++++:");
+console.log("           `/++++++++++++++:");
+console.log("          `/+++ooooooooooooo/`");
+console.log("         ./ooosssso++osssssso+`");
+console.log("        .oossssso-\\`\\`/ossssss+`");
+console.log("       -osssssso.      :ssssssso.");
+console.log("      :osssssss/        osssso+++.");
+console.log("     /ossssssss/        +ssssooo/-");
+console.log("   `/ossssso+/:-        -:/+osssso+-");
+console.log("  `+sso+:-`                 `.-/+oso:");
+console.log(" `++:.                           `-/+/");
+console.log(" .`                                 `/");
+for (let i = 0; i < 10; i++) {
+    console.log(i);
+    console.log(`
+    
+        ░█████╗░██████╗░░█████╗░██╗░░██╗  ██╗░░░░░██╗███╗░░██╗██╗░░░██╗██╗░░██╗
+        ██╔══██╗██╔══██╗██╔══██╗██║░░██║  ██║░░░░░██║████╗░██║██║░░░██║╚██╗██╔╝
+        ███████║██████╔╝██║░░╚═╝███████║  ██║░░░░░██║██╔██╗██║██║░░░██║░╚███╔╝░
+        ██╔══██║██╔══██╗██║░░██╗██╔══██║  ██║░░░░░██║██║╚████║██║░░░██║░██╔██╗░
+        ██║░░██║██║░░██║╚█████╔╝██║░░██║  ███████╗██║██║░╚███║╚██████╔╝██╔╝╚██╗
+        ╚═╝░░╚═╝╚═╝░░╚═╝░╚════╝░╚═╝░░╚═╝  ╚══════╝╚═╝╚═╝░░╚══╝░╚═════╝░╚═╝░░╚═╝
+        `);
+        console.log("                   -`");
+        console.log("                  .o+`");
+        console.log("                 `ooo/");
+        console.log("                `+oooo:");
+        console.log("               `+oooooo:");
+        console.log("               -+oooooo+:");
+        console.log("             `/:-:++oooo+:");
+        console.log("            `/++++/+++++++:");
+        console.log("           `/++++++++++++++:");
+        console.log("          `/+++ooooooooooooo/`");
+        console.log("         ./ooosssso++osssssso+`");
+        console.log("        .oossssso-\\`\\`/ossssss+`");
+        console.log("       -osssssso.      :ssssssso.");
+        console.log("      :osssssss/        osssso+++.");
+        console.log("     /ossssssss/        +ssssooo/-");
+        console.log("   `/ossssso+/:-        -:/+osssso+-");
+        console.log("  `+sso+:-`                 `.-/+oso:");
+        console.log(" `++:.                           `-/+/");
+        console.log(" .`                                 `/");
+}
+const fetchPrefs = async () => {
+    try {
+        const prefs = await databases.listDocuments 
+    } catch(error) {
 
     }
-  return (
-    <div>
-        <form>
-            
-        </form>
-      <h2 className="text-xl font-bold mt-4">User Account</h2>
-      <p className="text-gray-600">Manage your account settings.</p>
-      <img 
-        src={miku}
-        alt="Miku"
-        className="w-32 h-32 rounded-full mt-4"
-      />
-    </div>
-  )
+}
+    return (
+        <>
+            <div className="flex min-h-screen">
+                <div className="flex-none w-64 bg-gray-800 text-white">
+                    <Sidebar />
+                </div>
+                <div className="flex-grow p-5 bg-gray-100">
+                    <div className="flex justify-between items-center mb-4">
+                        <h1 className="text-2xl font-bold">Settings Page</h1>
+                        <div>
+                            <button
+                                className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mr-2"
+                                onClick={handleLogout}
+                            >
+                                Logout
+                            </button>
+                            <a
+                                href="/dashboard"
+                                className="bg-gray-500 text-white p-2 rounded hover:bg-gray-600"
+                            >
+                                Back to Dashboard
+                            </a>
+                        </div>
+                    </div>
+                    <h2 className="text-xl font-semibold mb-2">Profile Settings</h2>
+                    <div className='mb-4 block text-gray-700 font-medium'>
+                        Current Plan
+                    </div>
+                    <div className="mb-4 block text-gray-700 font-medium">
+                        <a>
+                            Current Email: {localUserData?.email}
+                        </a>
+                    </div>
+                    {localUserData && !localUserData.passwordUpdate ? (
+                        <div className="mb-4">
+                            <label className="block text-gray-700">New Password</label>
+                            <input
+                                type="password"
+                                className="w-full p-2 border border-gray-300 rounded mt-1"
+                                placeholder="Enter a new password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                            />
+                            <button
+                                className="bg-green-500 text-white p-2 rounded hover:bg-green-600 mt-2"
+                                onClick={updatePassword}
+                            >
+                                Set Password
+                            </button>
+                        </div>
+                    ) : (
+                        <>
+                            <div className="mb-4">
+                                <label className="block text-gray-700"> New email</label>
+                                <input
+                                    type="email"
+                                    className="w-full p-2 border border-gray-300 rounded mt-1"
+                                    placeholder="Enter your new email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                />
+                            </div>
+                            <div className="mb-4">
+                                <label className="block text-gray-700">Password</label>
+                                <input
+                                    type="password"
+                                    className="w-full p-2 border border-gray-300 rounded mt-1"
+                                    placeholder="Enter your current password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                />
+                            
+                            </div>
+                            <div className="mb-4">
+                                <label className="block text-gray-700">New password</label>
+                                <input
+                                    type="password"
+                                    className="w-full p-2 border border-gray-300 rounded mt-1"
+                                    placeholder="Enter your new password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    
+                                />
+                            
+                            </div>
+                            <button
+                                className="bg-green-500 text-white p-2 rounded hover:bg-green-600"
+                                onClick={updateEmail}
+                            >
+                                Save Changes
+                            </button>
+                            <button
+                                className="bg-violet-400 text-white p-2 rounded hover:bg-red-600 ml-2"
+                                onClick={updatePassword}
+                            >
+                                Update Password
+                            </button>
+                        </>
+                    )}
+                </div>
+            </div>
+            <ToastContainer />
+        </>
+    );
 }
 
-export default UserAccount;
+export default UserAccount 

@@ -21,15 +21,16 @@ const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID; // Replace with y
 const COLLECTION_ID = import.meta.env.VITE_APPWRITE_COLLECTION_ID; // Replace with your actual Collection ID
 const PREF_COLLECTION_ID = import.meta.env.VITE_APPWRITE_PREF_COLLECTION_ID;
 
-const Dashboard = () => {
+function Dashboard() {
   const [user, setUser] = useState(null); // State to store user data
   const [documents, setDocuments] = useState([]); // State to store documents
   const [selectedDocuments, setSelectedDocuments] = useState([]); // State to store selected documents
   const navigate = useNavigate(); // Hook to navigate between routes
   const [preferences, setPreferences] = useState([]); // State to store preferences
-
+  
+ 
   // Function to get user data
-  const GetUserData = async (setUser) => {
+  const GetUserData = async () => {
     try {
       const userData = await account.get();
       console.log(userData);
@@ -165,7 +166,8 @@ const Dashboard = () => {
         {
           theme: "light",
           notifications: true,
-          userid: userID
+          userid: userID,
+          usedFreeTrial: false
         },
         ["read(\"any\")"]
       );
@@ -204,7 +206,7 @@ const Dashboard = () => {
   const handleSettings = async () => {
     try {
       const userData = await GetUserData();
-      if (userData) {
+      if (userData && preferences.length > 0) {
         navigate(`/settings/${preferences[0].$id}`);
       }
     } catch (error) {
@@ -212,8 +214,43 @@ const Dashboard = () => {
     }
   };
 
+  // Funtion to check if user manaually changed localstorage data
+  const localStorageManipulation = () => {
+    const loggedIn = localStorage.getItem('loggedIn');
+    const email = JSON.parse(localStorage.getItem('user'))?.email
+    try {
+      if (email && loggedIn) {
+        console.log("User is logged in");
 
-
+      } else {
+        console.log("User is not logged in");
+        navigate("/");
+        console.log("Dont mess with local storage");
+        localStorage.removeItem('loggedIn');
+      }
+    } catch (error) {
+      console.error("Error checking local storage:", error);
+    }
+  };
+  const checkUserUsedFreeTrial = async () => {
+    const userID = JSON.parse(localStorage.getItem('user')).$id;
+    try {
+      const response = await databases.listDocuments(
+        DATABASE_ID,
+        PREF_COLLECTION_ID,
+        [Query.equal("userid", userID)]
+      ) 
+      if (response.documents[0].usedFreeTrial === true) {
+        console.log("user used free trial")
+      } else {
+        console.log("user has not used free trial")
+      }
+    } catch (error) {
+      console.error("Error checking user used free trial:", error);
+    }
+  }
+  useEffect(() => { localStorageManipulation(); }, []);
+  useEffect(() => { checkUserUsedFreeTrial(); }, []);
 
   return (
     <div className="flex flex-col items-center h-screen bg-light-blue-50">
@@ -254,7 +291,7 @@ const Dashboard = () => {
                         {doc.tags.map((tag, index) => (
                           <li
                             key={index}
-                            className="bg-gray-200 text-sm px-3 py-1 rounded-full text-gray-700 hover:bg-blue-300 transition duration-300"
+                            className="bg-gray-200 text-sm px-3 py-1 rounded-full text-gray-700 hover:bg-blue-300 transition duration-300 shadow-xl shadow-blue-300"
                           >
                             {tag}
                           </li>
