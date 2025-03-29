@@ -27,8 +27,14 @@ function Dashboard() {
   const [selectedDocuments, setSelectedDocuments] = useState([]); // State to store selected documents
   const navigate = useNavigate(); // Hook to navigate between routes
   const [preferences, setPreferences] = useState([]); // State to store preferences
-  
- 
+  const TrailActivated  = () => {
+    toast("Trail is activated");
+    localStorage.setItem("firstTime", "false");
+  }
+  const firstTime = localStorage.getItem("firstTime");
+  if (firstTime === "true") {
+    TrailActivated();
+  }
   // Function to get user data
   const GetUserData = async () => {
     try {
@@ -158,6 +164,7 @@ function Dashboard() {
   // Function to create user preferences
   const createPrefs = async () => {
     const userID = JSON.parse(localStorage.getItem('user')).$id;
+    const date = new Date();
     try {
       await databases.createDocument(
         DATABASE_ID,
@@ -167,7 +174,8 @@ function Dashboard() {
           theme: "light",
           notifications: true,
           userid: userID,
-          usedFreeTrial: false
+          usedFreeTrial: false,
+          TimeActivatedTrial: date
         },
         ["read(\"any\")"]
       );
@@ -239,16 +247,32 @@ function Dashboard() {
         DATABASE_ID,
         PREF_COLLECTION_ID,
         [Query.equal("userid", userID)]
-      ) 
-      if (response.documents[0].usedFreeTrial === true) {
-        console.log("user used free trial")
+      );
+  
+      if (response.documents && response.documents.length > 0) {
+        // Retrieve the user's data
+        const userPrefs = response.documents[0];
+        const usedFreeTrial = userPrefs.usedFreeTrial !== undefined ? userPrefs.usedFreeTrial : false;
+        const timeActivatedTrial = userPrefs.TimeActivatedTrial;
+  
+        if (usedFreeTrial === true) {
+          console.log("User has used the free trial.");
+        } else {
+          console.log("User has not used the free trial.");
+        }
+  
+        // Optionally, log the time when the trial was activated
+        if (timeActivatedTrial) {
+          console.log(`Trial activated on: ${timeActivatedTrial}`);
+        }
       } else {
-        console.log("user has not used free trial")
+        console.log("No preferences found for the user.");
       }
     } catch (error) {
       console.error("Error checking user used free trial:", error);
     }
-  }
+  };
+  
   useEffect(() => { localStorageManipulation(); }, []);
   useEffect(() => { checkUserUsedFreeTrial(); }, []);
 

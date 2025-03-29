@@ -77,7 +77,11 @@ function AppPreferences() {
       toast.error("Error creating preferences.");
     }
   };
-
+useEffect(() => {
+    if (preferences.length === 0) {
+      createPrefs();
+    }
+  }, [preferences]);
   const handleUpdate = async (id, field, value) => {
     try {
       await databases.updateDocument(DATABASE_ID, PREFS_COLLECTION_ID, id, {
