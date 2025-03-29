@@ -56,7 +56,7 @@ const Typewriter = ({ speed = 100 }) => {
 
   return (
     <div className="inline-block w-full text-center whitespace-nowrap">
-      <div className="inline-block min-w-[24rem] h-12">
+      <div className="inline-block min-w-[24rem] h-12 font-handwriting text-light-blue-800 text-6xl">
         {displayText}
       </div>
     </div>
@@ -106,11 +106,6 @@ function LandingPage() {
   const screenshotRef = useRef(null);
   const featuresInView = useInView(featuresRef, { once: true, amount: 0.2 });
   const screenshotInView = useInView(screenshotRef, { once: true, amount: 0.2 });
-  const addIfUserUsedFreeTrial = () => {
-    // Add user to the "Free Trial" group if they used the free trial
-    localStorage.setItem("freeTrial", "true");
-    console.log(localStorage.getItem("freeTrial"));
-  }
   return (
     <div className="flex flex-col items-center min-h-screen bg-gradient-to-b from-light-blue-200 via-neutral-100 to-light-green-100 text-black px-6">
       {/* Navigation Bar */}
@@ -160,7 +155,7 @@ function LandingPage() {
         <h1 className="text-6xl font-extrabold text-light-blue-800 leading-tight mb-4">
           <Typewriter speed={100} />
         </h1>
-        <p className="text-xl text-gray-600 mb-8">
+        <p className="text-2xl text-gray-600 mb-8 font-dancing_script ">
           Transform how you capture, organize, and recall your ideas with InkNote's intelligent
           note-taking platform.
         </p>
@@ -174,7 +169,6 @@ function LandingPage() {
           <a
             href="/signup"
             className="bg-light-blue-700 text-white px-8 py-3 rounded-full text-lg font-semibold hover:bg-light-blue-800 transition-colors shadow-lg"
-            onClick={addIfUserUsedFreeTrial}
           >
             Start Free Trial
           </a>
@@ -193,7 +187,7 @@ function LandingPage() {
         initial="hidden"
         animate={featuresInView ? 'visible' : 'hidden'}
         variants={containerVariants}
-        className="max-w-6xl mt-16 grid md:grid-cols-3 gap-8 px-4"
+        className="max-w-6xl mt-16 grid md:grid-cols-3 gap-8 px-4 font-Sacramento"
       >
         {features.map((feature, index) => (
           <motion.div
@@ -206,9 +200,9 @@ function LandingPage() {
               transition: { duration: 0.4 },
             }}
           >
-            <div className="flex justify-center mb-4">{feature.icon}</div>
-            <h3 className="text-xl font-bold mb-2 text-light-blue-800">{feature.title}</h3>
-            <p className="text-gray-600">{feature.description}</p>
+            <div className="flex justify-center mb-4 ">{feature.icon}</div>
+            <h3 className="text-xl font-bold mb-2 text-light-blue-800 font-indie_flower">{feature.title}</h3>
+            <p className="text-gray-600 font-handwriting">{feature.description}</p>
           </motion.div>
         ))}
       </motion.section>
@@ -248,7 +242,7 @@ function LandingPage() {
         © 2025 InkNote. Empowering Your Creativity.
       </footer>
       <b>
-        <a href="/terms" className="text-blue-500 hover:text-blue-700 m-4 cursor-pointer">
+        <a href="/terms" className="text-blue-500 hover:text-blue-700 m-4 cursor-pointer  x">
           Terms and conditions apply.
         </a>
       </b>

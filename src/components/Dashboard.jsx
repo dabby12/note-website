@@ -1,45 +1,49 @@
 import { useEffect, useState } from "react";
-import { account, databases, } from "../api/appwrite.config.js";
 import { useNavigate } from "react-router-dom";
-import { MdEdit } from "react-icons/md";
+import { account, databases } from "../api/appwrite.config.js";
+import { Query } from "appwrite";
+import { ToastContainer, toast } from 'react-toastify';
+import { Menu, MenuHandler, MenuList, MenuItem } from "@material-tailwind/react";
+
+// Icons
+import { MdEdit, MdDelete } from "react-icons/md";
 import { FaPen, FaRegCircle } from "react-icons/fa6";
 import { IoIosCheckmarkCircle } from "react-icons/io";
-import { ToastContainer, toast } from 'react-toastify';
-import { Query } from "appwrite";
 import { IoSettings } from "react-icons/io5";
-import { MdDelete } from "react-icons/md";
-import miku from "../assets/miku.jpg";
-import {
-  Menu,
-  MenuHandler,
-  MenuList,
-  MenuItem,
-} from "@material-tailwind/react";
 import { GrLogout } from "react-icons/gr";
 
-const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID; // Replace with your actual Database ID
-const COLLECTION_ID = import.meta.env.VITE_APPWRITE_COLLECTION_ID; // Replace with your actual Collection ID
+// Assets
+import miku from "../assets/miku.jpg";
+
+// Environment variables
+const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID;
+const COLLECTION_ID = import.meta.env.VITE_APPWRITE_COLLECTION_ID;
 const PREF_COLLECTION_ID = import.meta.env.VITE_APPWRITE_PREF_COLLECTION_ID;
 
 function Dashboard() {
-  const [user, setUser] = useState(null); // State to store user data
-  const [documents, setDocuments] = useState([]); // State to store documents
-  const [selectedDocuments, setSelectedDocuments] = useState([]); // State to store selected documents
-  const navigate = useNavigate(); // Hook to navigate between routes
-  const [preferences, setPreferences] = useState([]); // State to store preferences
-  const TrailActivated  = () => {
-    toast("Trail is activated");
-    localStorage.setItem("firstTime", "false");
-  }
-  const firstTime = localStorage.getItem("firstTime");
-  if (firstTime === "true") {
-    TrailActivated();
-  }
+  // State variables
+  const [user, setUser] = useState(null);
+  const [documents, setDocuments] = useState([]);
+  const [selectedDocuments, setSelectedDocuments] = useState([]);
+  const [preferences, setPreferences] = useState([]);
+  const [prefsId, setPrefsId] = useState(null);
+  const [plan, setPlan] = useState(null);
+  
+  const navigate = useNavigate();
+
+  // Trial activation notification
+  useEffect(() => {
+    const firstTime = localStorage.getItem("firstTime");
+    if (firstTime === "true") {
+      toast("Trial is activated");
+      localStorage.setItem("firstTime", "false");
+    }
+  }, []);
+
   // Function to get user data
-  const GetUserData = async () => {
+  const getUserData = async () => {
     try {
       const userData = await account.get();
-      console.log(userData);
       setUser(userData);
       localStorage.setItem('user', JSON.stringify(userData));
       return userData;
@@ -49,30 +53,31 @@ function Dashboard() {
     }
   };
 
-  // Effect to check user authentication
+  // Check user authentication
   useEffect(() => {
     const checkUser = async () => {
       try {
-        const userData = await GetUserData(setUser);
-        setUser(userData);
-        if (!localStorage.getItem('loggedIn')) {
-          toast.success("Welcome, " + userData.name); // Show toast notification after setting user
+        const userData = await getUserData();
+        if (!localStorage.getItem('loggedIn') && userData) {
+          toast.success(`Welcome, ${userData.name}`);
           localStorage.setItem('loggedIn', 'true');
         }
       } catch (error) {
-        navigate("/"); // Redirect to login if not logged in
+        navigate("/");
       }
     };
 
     checkUser();
   }, [navigate]);
 
-  // Effect to fetch documents for the authenticated user
+  // Fetch documents for authenticated user
   useEffect(() => {
     const fetchDocuments = async () => {
+      if (!user) return;
+      
       try {
         const response = await databases.listDocuments(DATABASE_ID, COLLECTION_ID, [
-          Query.equal("userID", [user.$id]), // Fetch documents by user ID
+          Query.equal("userID", [user.$id]),
         ]);
         setDocuments(response.documents);
       } catch (error) {
@@ -80,25 +85,165 @@ function Dashboard() {
       }
     };
 
+    fetchDocuments();
+  }, [user]);
+
+  // Create user preferences
+  const createPrefs = async () => {
+    if (!user) return;
+    
+    try {
+      const date = new Date();
+      await databases.createDocument(
+        DATABASE_ID,
+        PREF_COLLECTION_ID,
+        'unique()',
+        {
+          theme: "light",
+          notifications: true,
+          userid: user.$id,
+          usedFreeTrial: false,
+          TimeActivatedTrial: date,
+          plan: "free",
+        },
+        ["read(\"any\")"]
+      );
+      localStorage.setItem('prefsCreated', 'true');
+    } catch (error) {
+      console.error("Error creating preferences:", error);
+    }
+  };
+
+  // Fetch user preferences
+  const fetchPrefs = async () => {
+    if (!user) return;
+
+    try {
+      const response = await databases.listDocuments(
+        DATABASE_ID,
+        PREF_COLLECTION_ID,
+        [Query.equal("userid", user.$id)]
+      );
+
+      if (response.documents.length === 0) {
+        if (!localStorage.getItem('prefsCreated')) {
+          await createPrefs();
+        }
+      } else {
+        setPreferences(response.documents);
+        setPrefsId(response.documents[0].$id);
+        localStorage.setItem('prefsId', response.documents[0].$id);
+        setPlan(response.documents[0].plan);
+      }
+    } catch (error) {
+      console.error("Error fetching preferences:", error);
+    }
+  };
+
+  // Check user preferences and trial status
+  useEffect(() => {
     if (user) {
-      fetchDocuments();
+      fetchPrefs();
+      checkUserUsedFreeTrial();
+      checkFreeTrialOver();
     }
   }, [user]);
 
-  // Function to handle user logout
+  // Check free trial status
+  const checkUserUsedFreeTrial = async () => {
+    if (!user) return;
+    
+    try {
+      const response = await databases.listDocuments(
+        DATABASE_ID,
+        PREF_COLLECTION_ID,
+        [Query.equal("userid", user.$id)]
+      );
+  
+      if (response.documents && response.documents.length > 0) {
+        const userPrefs = response.documents[0];
+        const usedFreeTrial = userPrefs.usedFreeTrial || false;
+        const timeActivatedTrial = userPrefs.TimeActivatedTrial;
+        if (!usedFreeTrial && timeActivatedTrial) {
+          const date = new Date();
+          const diffTime = Math.abs(date - new Date(timeActivatedTrial));
+          if (diffTime > 1000 * 60 * 60 * 24 * 14) { // 14 days in milliseconds
+            await databases.updateDocument(
+              DATABASE_ID,
+              PREF_COLLECTION_ID,
+              userPrefs.$id,
+              { usedFreeTrial: true }
+            );
+            toast.error("Your free trial is over.");
+          } else {
+            localStorage.setItem("firstTime", "true");
+          }
+        }
+        setPlan(userPrefs.plan);
+      }
+    } catch (error) {
+      console.error("Error checking user free trial:", error);
+    }
+  };
+
+  // Check if free trial is over
+  const checkFreeTrialOver = async () => {
+    if (!prefsId || !user) return;
+    
+    try {
+      const response = await databases.getDocument(
+        DATABASE_ID,
+        PREF_COLLECTION_ID,
+        prefsId
+      );
+      
+      const dateActivated = response.TimeActivatedTrial;
+      const date = new Date();
+      const diffTime = Math.abs(date - new Date(dateActivated));
+      
+      // Needs actual logic to determine trial period
+      if (diffTime > 1000 * 60 * 60 * 24 * 7) { // 7 days in milliseconds
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error("Error checking free trial status:", error);
+    }
+  };
+
+  // Verify user authentication from localStorage
+  const verifyLocalStorage = () => {
+    try {
+      const loggedIn = localStorage.getItem('loggedIn');
+      const userData = JSON.parse(localStorage.getItem('user'));
+      
+      if (!(userData?.email && loggedIn)) {
+        navigate("/");
+        localStorage.removeItem('loggedIn');
+      }
+    } catch (error) {
+      console.error("Error checking local storage:", error);
+      navigate("/");
+    }
+  };
+
+  useEffect(() => { 
+    verifyLocalStorage(); 
+  }, []);
+
+  // UI handlers
   const handleLogout = async () => {
     await account.deleteSession("current");
     localStorage.removeItem('loggedIn');
-    navigate("/"); // Redirect to login after logout
+    navigate("/");
   };
 
-  // Function to format date
-  const formatDate = (dateString) => {
-    const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
-    return new Date(dateString).toLocaleDateString(undefined, options);
+  const handleSettings = async () => {
+    if (preferences.length > 0) {
+      navigate(`/settings/${preferences[0].$id}`);
+    }
   };
 
-  // Function to handle document selection
   const handleSelectDocument = (docId) => {
     setSelectedDocuments((prevSelected) =>
       prevSelected.includes(docId)
@@ -107,46 +252,41 @@ function Dashboard() {
     );
   };
 
-  // Function to delete multiple selected documents
-  const MassDelete = async () => {
-    alert("Are you sure you want to delete these documents?");
+  const deleteDocument = async (docId) => {
+    if (!confirm("Are you sure you want to delete this document?")) return;
+    
     try {
-      for (const docId of selectedDocuments) {
-        await databases.deleteDocument(DATABASE_ID, COLLECTION_ID, docId);
-      }
-      console.log("Documents deleted");
-      toast.success("Documents deleted successfully");
-      setSelectedDocuments([]);
-      Refresh();
-    } catch (error) {
-      console.error("Error deleting documents:", error);
-      toast.error("Error deleting documents");
-    }
-  };
-
-  // Function to delete a single document
-  const Delete = async (docId) => {
-    try {
-      await databases.deleteDocument(
-        DATABASE_ID,
-        COLLECTION_ID,
-        selectedDocuments.includes(docId) ? docId : selectedDocuments
-      );
-      console.log("Document deleted");
+      await databases.deleteDocument(DATABASE_ID, COLLECTION_ID, docId);
       toast.success("Document deleted successfully");
-      Refresh();
+      location.reload();
     } catch (error) {
       console.error("Error deleting document:", error);
       toast.error("Error deleting document");
     }
   };
 
-  // Function to refresh the page
-  const Refresh = async () => {
-    location.reload();
+  const deleteMassDocuments = async () => {
+    if (!confirm("Are you sure you want to delete these documents?")) return;
+    
+    try {
+      for (const docId of selectedDocuments) {
+        await databases.deleteDocument(DATABASE_ID, COLLECTION_ID, docId);
+      }
+      toast.success("Documents deleted successfully");
+      setSelectedDocuments([]);
+      location.reload();
+    } catch (error) {
+      console.error("Error deleting documents:", error);
+      toast.error("Error deleting documents");
+    }
   };
 
-  // Function to render document content
+  // Helper functions
+  const formatDate = (dateString) => {
+    const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+    return new Date(dateString).toLocaleDateString(undefined, options);
+  };
+
   const renderContent = (content) => {
     if (typeof content === 'string') {
       try {
@@ -161,124 +301,9 @@ function Dashboard() {
     return <p>{content}</p>;
   };
 
-  // Function to create user preferences
-  const createPrefs = async () => {
-    const userID = JSON.parse(localStorage.getItem('user')).$id;
-    const date = new Date();
-    try {
-      await databases.createDocument(
-        DATABASE_ID,
-        PREF_COLLECTION_ID,
-        'unique()',
-        {
-          theme: "light",
-          notifications: true,
-          userid: userID,
-          usedFreeTrial: false,
-          TimeActivatedTrial: date
-        },
-        ["read(\"any\")"]
-      );
-    } catch (error) {
-      console.error("Error creating preferences:", error);
-    }
-  };
-
-  // Function to fetch user preferences
-  const fetchPrefs = async () => {
-    try {
-      const response = await databases.listDocuments(
-        DATABASE_ID,
-        PREF_COLLECTION_ID,
-        [Query.equal("userid", user.$id)]
-      );
-      setPreferences(response.documents);
-      if (response.documents.length === 0) {
-        createPrefs();
-      } else {
-        console.log("Preferences fetched successfully:", response.documents);
-      }
-    } catch (error) {
-      console.error("Error fetching preferences:", error);
-    }
-  };
-
-  // Effect to fetch preferences
-  useEffect(() => {
-    if (user) {
-      fetchPrefs();
-    }
-  }, [user]);
-
-  // Function to handle settings navigation
-  const handleSettings = async () => {
-    try {
-      const userData = await GetUserData();
-      if (userData && preferences.length > 0) {
-        navigate(`/settings/${preferences[0].$id}`);
-      }
-    } catch (error) {
-      navigate("/");
-    }
-  };
-
-  // Funtion to check if user manaually changed localstorage data
-  const localStorageManipulation = () => {
-    const loggedIn = localStorage.getItem('loggedIn');
-    const email = JSON.parse(localStorage.getItem('user'))?.email
-    try {
-      if (email && loggedIn) {
-        console.log("User is logged in");
-
-      } else {
-        console.log("User is not logged in");
-        navigate("/");
-        console.log("Dont mess with local storage");
-        localStorage.removeItem('loggedIn');
-      }
-    } catch (error) {
-      console.error("Error checking local storage:", error);
-    }
-  };
-  const checkUserUsedFreeTrial = async () => {
-    const userID = JSON.parse(localStorage.getItem('user')).$id;
-    try {
-      const response = await databases.listDocuments(
-        DATABASE_ID,
-        PREF_COLLECTION_ID,
-        [Query.equal("userid", userID)]
-      );
-  
-      if (response.documents && response.documents.length > 0) {
-        // Retrieve the user's data
-        const userPrefs = response.documents[0];
-        const usedFreeTrial = userPrefs.usedFreeTrial !== undefined ? userPrefs.usedFreeTrial : false;
-        const timeActivatedTrial = userPrefs.TimeActivatedTrial;
-  
-        if (usedFreeTrial === true) {
-          console.log("User has used the free trial.");
-        } else {
-          console.log("User has not used the free trial.");
-        }
-  
-        // Optionally, log the time when the trial was activated
-        if (timeActivatedTrial) {
-          console.log(`Trial activated on: ${timeActivatedTrial}`);
-        }
-      } else {
-        console.log("No preferences found for the user.");
-      }
-    } catch (error) {
-      console.error("Error checking user used free trial:", error);
-    }
-  };
-  
-  useEffect(() => { localStorageManipulation(); }, []);
-  useEffect(() => { checkUserUsedFreeTrial(); }, []);
-
   return (
     <div className="flex flex-col items-center h-screen bg-light-blue-50">
-      <h1 className="text-3xl font-bold mt-4 animate-fade-in text-light-blue-800">Welcome, {user?.name}!</h1>
+      <h1 className="text-3xl font-bold mt-4 animate-fade-in text-light-blue-800 font-handwriting">Welcome, {user?.name}!</h1>
       <h2 className="text-xl font-semibold mt-6 animate-fade-in">Your notes:</h2>
 
       <div className="flex flex-row items-start justify-center flex-grow flex-wrap">
@@ -287,9 +312,7 @@ function Dashboard() {
             documents.map((doc) => (
               <div
                 key={doc.$id}
-                className={`relative w-64 h-auto px-2 shadow-teal-500 m-2 rounded-lg transition duration-300 transform hover:scale-105 ${
-                  selectedDocuments.includes(doc.$id) ? '' : ''
-                }`}
+                className={`relative w-64 h-auto px-2 shadow-teal-500 m-2 rounded-lg transition duration-300 transform hover:scale-105`}
                 onClick={() => handleSelectDocument(doc.$id)}
               >
                 <div className="absolute top-2 right-2">
@@ -307,7 +330,6 @@ function Dashboard() {
                   <li className="p-2 border-b">{formatDate(doc.Date)}</li>
                   <li className="p-2 border-b">{doc.$id}</li>
 
-                  {/* Display tags only if there are any */}
                   {doc.tags && doc.tags.length > 0 && (
                     <div className="p-2 border-b">
                       <strong>Tags:</strong>
@@ -324,10 +346,12 @@ function Dashboard() {
                     </div>
                   )}
 
-                  {/* Edit button */}
                   <button
                     className="p-2 bg-blue-500 text-white hover:bg-blue-600 transition duration-300 rounded-b-lg w-full mt-4 flex items-center justify-center"
-                    onClick={() => navigate(`/edit/${doc.$id}`)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/edit/${doc.$id}`);
+                    }}
                   >
                     <MdEdit className="mr-2" /> Edit
                   </button>
@@ -346,7 +370,7 @@ function Dashboard() {
 
       {selectedDocuments.length > 1 && (
         <button
-          onClick={MassDelete}
+          onClick={deleteMassDocuments}
           className="mt-4 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition duration-300 transform hover:scale-105 flex items-center justify-center m-4"
         >
           <MdDelete className="mr-2" /> Delete all selected
@@ -355,7 +379,7 @@ function Dashboard() {
 
       {selectedDocuments.length === 1 && (
         <button
-          onClick={() => Delete(selectedDocuments[0])}
+          onClick={() => deleteDocument(selectedDocuments[0])}
           className="mt-4 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition duration-300 transform hover:scale-105 flex items-center justify-center m-4"
         >
           <MdDelete className="mr-2" /> Delete
@@ -383,6 +407,6 @@ function Dashboard() {
       <ToastContainer />
     </div>
   );
-};
+}
 
 export default Dashboard;

@@ -7,6 +7,14 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        pacifico: ['Pacifico', 'cursive'],
+        sacramento: ['Sacramento', 'cursive'],
+        indie_flower: ['Indie Flower', 'cursive'],
+        dancing_script: ['Dancing Script', 'cursive'],
+        shadow_into_light: ['Shadow Into Light', 'cursive'],
+        handwriting: ['Patrick Hand', 'cursive'],
+      },      
       colors: {
         dark: {
           100: '#d1d5db',
@@ -20,66 +28,66 @@ export default {
           900: '#0a0e14',
         },
         'light-blue': {
-          50: '#f0f9ff', // very light blue
-          100: '#d1e9ff', // light blue
-          200: '#a0c8e1', // pastel light blue
-          300: '#7baed0', // muted light blue
-          400: '#4c93be', // slightly deeper blue
-          500: '#ADD8E6', // main light blue (default)
-          600: '#8cbfd0', // deep blue tone
-          700: '#659fb9', // even deeper blue
-          800: '#4a7a9f', // darker blue
-          900: '#335a7f', // very dark blue
+          50: '#f0f9ff',
+          100: '#d1e9ff',
+          200: '#a0c8e1',
+          300: '#7baed0',
+          400: '#4c93be',
+          500: '#ADD8E6',
+          600: '#8cbfd0',
+          700: '#659fb9',
+          800: '#4a7a9f',
+          900: '#335a7f',
         },
         'light-green': {
-          50: '#f1fbf5', // very light green
-          100: '#d2f4d1', // light green
-          200: '#a4e2a3', // pastel light green
-          300: '#78d076', // muted light green
-          400: '#4ec24e', // slightly deeper green
-          500: '#9FE2BF', // main light green (default)
-          600: '#7cc78c', // deeper green tone
-          700: '#5aa86a', // even deeper green
-          800: '#3f8a49', // darker green
-          900: '#2d6e28', // very dark green
+          50: '#f1fbf5',
+          100: '#d2f4d1',
+          200: '#a4e2a3',
+          300: '#78d076',
+          400: '#4ec24e',
+          500: '#9FE2BF',
+          600: '#7cc78c',
+          700: '#5aa86a',
+          800: '#3f8a49',
+          900: '#2d6e28',
         },
         'light-purple': {
-          50: '#f9f5fd', // very light purple
-          100: '#ede3fa', // light purple
-          200: '#d8c6f2', // pastel light purple
-          300: '#c3a9ea', // muted light purple
-          400: '#af8de2', // slightly deeper purple
-          500: '#9a71d9', // main light purple
-          600: '#8556c5', // deep purple tone
-          700: '#703eb0', // even deeper purple
-          800: '#5c279c', // darker purple
-          900: '#471188', // very dark purple
+          50: '#f9f5fd',
+          100: '#ede3fa',
+          200: '#d8c6f2',
+          300: '#c3a9ea',
+          400: '#af8de2',
+          500: '#9a71d9',
+          600: '#8556c5',
+          700: '#703eb0',
+          800: '#5c279c',
+          900: '#471188',
         },
         'light-coral': {
-          50: '#fff0f0', // very light coral
-          100: '#ffe0e0', // light coral
-          200: '#ffc2c2', // pastel light coral
-          300: '#ffa3a3', // muted light coral
-          400: '#ff8585', // slightly deeper coral
-          500: '#ff6666', // main light coral
-          600: '#e64c4c', // deep coral tone
-          700: '#cc3333', // even deeper coral
-          800: '#b31919', // darker coral
-          900: '#990000', // very dark coral
+          50: '#fff0f0',
+          100: '#ffe0e0',
+          200: '#ffc2c2',
+          300: '#ffa3a3',
+          400: '#ff8585',
+          500: '#ff6666',
+          600: '#e64c4c',
+          700: '#cc3333',
+          800: '#b31919',
+          900: '#990000',
         },
         'light-amber': {
-          50: '#fffbeb', // very light amber
-          100: '#fef3c7', // light amber
-          200: '#fde68a', // pastel light amber
-          300: '#fcd34d', // muted light amber
-          400: '#fbbf24', // slightly deeper amber
-          500: '#f59e0b', // main light amber
-          600: '#d97706', // deep amber tone
-          700: '#b45309', // even deeper amber
-          800: '#92400e', // darker amber
-          900: '#78350f', // very dark amber
+          50: '#fffbeb',
+          100: '#fef3c7',
+          200: '#fde68a',
+          300: '#fcd34d',
+          400: '#fbbf24',
+          500: '#f59e0b',
+          600: '#d97706',
+          700: '#b45309',
+          800: '#92400e',
+          900: '#78350f',
         },
-        'neutral': {
+        neutral: {
           50: '#f9fafb',
           100: '#f3f4f6',
           200: '#e5e7eb',
@@ -146,4 +154,4 @@ export default {
     },
   },
   plugins: [],
-}
+};

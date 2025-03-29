@@ -43,7 +43,7 @@ function AppPreferences() {
         if (fetchedPrefs.documents.length > 0) {
           setPreferences(fetchedPrefs.documents);
           const docId = fetchedPrefs.documents[0].$id;
-          setPrefsId(docId); // Store the document ID in state
+          setPrefsId(docId); // Store the document ID in state 
         }
       } catch (error) {
         console.error("Error fetching preferences:", error);
@@ -53,10 +53,9 @@ function AppPreferences() {
 
     fetchPreferences();
   }, [userData]);
-
   const createPrefs = async () => {
     if (!userData) return;
-
+    
     try {
       const response = await databases.createDocument(
         DATABASE_ID,
@@ -66,6 +65,7 @@ function AppPreferences() {
           userid: userData.$id,
           theme: "light",
           notifications: true,
+          usedFreeTrial: true
         }
       );
 

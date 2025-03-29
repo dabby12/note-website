@@ -4,12 +4,14 @@ import Sidebar from "../Special/Sidebar.jsx";
 import { ToastContainer, toast } from 'react-toastify';
 import { account, databases } from "../../api/appwrite.config.js";
 import { Query } from "appwrite";
-import { CheckCircle, XCircle, Clock } from "lucide-react"; // Icons
+import { CheckCircle, Clock } from "lucide-react"; // Icons
 
 function UserAccount() {
     const navigate = useNavigate();
     const [email, setEmail] = useState('');
+    const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [newPassword, setNewPassword] = useState(''); // Added new state for new password
     const [localUserData, setLocalUserData] = useState(null);
     const [planStatus, setPlanStatus] = useState('checking'); // "active", "expired", "checking"
     
@@ -39,6 +41,7 @@ function UserAccount() {
         try {
             const userData = await account.get();
             setEmail(userData.email);
+            setUsername(userData.name || '');
             setLocalUserData(userData);
         } catch (error) {
             console.error("Failed to fetch user data:", error);
@@ -66,36 +69,87 @@ function UserAccount() {
     const updateEmail = async () => {
         if (!password) {
             toast.error("Please enter your password to update the email.");
-            return;
+            return false;
         }
         try {
             await account.updateEmail(email, password);
             toast.success("Email updated successfully");
-            setEmail('');
-            setPassword('');
+            return true;
         } catch (error) {
             console.error("Failed to update email:", error);
             toast.error("Failed to update email");
+            return false;
         }
     };
 
     // ✅ Update Password
     const updatePassword = async () => {
-        if (!password) {
+        if (!newPassword) {
             toast.error("Please enter a new password.");
-            return;
+            return false;
         }
         try {
-            await account.updatePassword(password);
+            await account.updatePassword(newPassword);
             toast.success("Password updated successfully");
-            setPassword('');
-            window.location.reload();
+            return true;
         } catch (error) {
             console.error("Failed to update password:", error);
             toast.error("Failed to update password");
+            return false;
         }
     };
-
+    
+    const updateUsername = async () => {
+        try {
+            const result = await account.updateName(username);
+            setUsername(result.name);
+            toast.success("Username updated successfully");
+            return true;
+        } catch(error) {
+            console.error("Failed to update username:", error);
+            toast.error("Failed to update username");
+            return false;
+        }
+    }
+    
+    const handleSave = async () => {
+        try {
+            let hasUpdates = false;
+            
+            // Check if username is changed and not empty
+            if (username && username !== localUserData?.name) {
+                const usernameUpdated = await updateUsername();
+                hasUpdates = hasUpdates || usernameUpdated;
+            }
+            
+            // Check if email is changed and not empty
+            if (email && email !== localUserData?.email && password) {
+                const emailUpdated = await updateEmail();
+                hasUpdates = hasUpdates || emailUpdated;
+            }
+            
+            // Check if new password is provided
+            if (newPassword) {
+                const passwordUpdated = await updatePassword();
+                hasUpdates = hasUpdates || passwordUpdated;
+            }
+            
+            if (hasUpdates) {
+                toast.success("Profile updated successfully");
+                // Clear fields after successful update
+                setPassword('');
+                setNewPassword('');
+                // Refresh user data
+                getUser();
+            } else if (!username && !email && !newPassword) {
+                toast.info("No changes were made to your profile");
+            }
+        } catch(error) {
+            console.error("Error updating profile:", error);
+            toast.error("Failed to update profile");
+        }
+    }
+    
     return (
         <>
             <div className="flex min-h-screen">
@@ -128,9 +182,10 @@ function UserAccount() {
                     <div className="mb-4 p-4 bg-white shadow-md rounded-lg flex items-center gap-4">
                         {planStatus === "expired" ? (
                             <>
-                                <XCircle className="text-red-500 w-6 h-6" />
-                                <span className="text-lg font-semibold text-red-600">Free Plan</span>
+                                <CheckCircle className="text-light-blue-400 w-6 h-6" />
+                                <span className="text-lg font-semibold text-light-blue-800">Free Plan</span>
                             </>
+                            
                         ) : planStatus === "active" ? (
                             <>
                                 <CheckCircle className="text-green-500 w-6 h-6" />
@@ -138,16 +193,19 @@ function UserAccount() {
                             </>
                         ) : (
                             <>
-                                <Clock className="text-yellow-500 w-6 h-6" />
+                                <Clock className="text-yellow-500 w-6 h-6 " />
                                 <span className="text-lg font-semibold text-yellow-600">Checking Plan...</span>
                             </>
                         )}
                     </div>
-
+                    
                     {/* Profile Settings */}
                     <h2 className="text-xl font-semibold mb-2">Profile Settings</h2>
                     <div className="mb-4 block text-gray-700 font-medium">
                         <a>Current Email: {localUserData?.email}</a>
+                    </div>
+                    <div className='mb-4 block text-gray-700 font-medium'>
+                        <a>Current Username: {localUserData?.name}</a>
                     </div>
 
                     {localUserData && !localUserData.passwordUpdate ? (
@@ -157,8 +215,8 @@ function UserAccount() {
                                 type="password"
                                 className="w-full p-2 border border-gray-300 rounded mt-1"
                                 placeholder="Enter a new password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
+                                value={newPassword}
+                                onChange={(e) => setNewPassword(e.target.value)}
                             />
                             <button
                                 className="bg-green-500 text-white p-2 rounded hover:bg-green-600 mt-2"
@@ -178,9 +236,17 @@ function UserAccount() {
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                 />
+                                <label className='block text-gray-700 mt-3'>New username</label>
+                                <input 
+                                type='text'
+                                className='w-full p-2 border border-gray-300 rounded mt-1'
+                                placeholder='Enter your new username'
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value)}
+                                />
                             </div>
                             <div className="mb-4">
-                                <label className="block text-gray-700">Password</label>
+                                <label className="block text-gray-700">Current Password</label>
                                 <input
                                     type="password"
                                     className="w-full p-2 border border-gray-300 rounded mt-1"
@@ -195,21 +261,15 @@ function UserAccount() {
                                     type="password"
                                     className="w-full p-2 border border-gray-300 rounded mt-1"
                                     placeholder="Enter your new password"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
+                                    value={newPassword}
+                                    onChange={(e) => setNewPassword(e.target.value)}
                                 />
                             </div>
                             <button
                                 className="bg-green-500 text-white p-2 rounded hover:bg-green-600"
-                                onClick={updateEmail}
+                                onClick={handleSave}
                             >
                                 Save Changes
-                            </button>
-                            <button
-                                className="bg-violet-400 text-white p-2 rounded hover:bg-red-600 ml-2"
-                                onClick={updatePassword}
-                            >
-                                Update Password
                             </button>
                         </>
                     )}
