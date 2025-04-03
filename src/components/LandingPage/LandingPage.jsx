@@ -219,7 +219,7 @@ function LandingPage() {
           {screenshots.map((_, index) => (
             <button
               key={index}
-              onClick={() => setActiveScreenshot(index)}
+              onClick={() => setActiveScreenshot(index)} 
               className={`w-3 h-3 rounded-full ${
                 activeScreenshot === index ? 'bg-light-blue-700' : 'bg-gray-300'
               }`}

@@ -15,6 +15,7 @@ import { GrLogout } from "react-icons/gr";
 // Assets
 import miku from "../assets/miku.jpg";
 
+
 // Environment variables
 const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID;
 const COLLECTION_ID = import.meta.env.VITE_APPWRITE_COLLECTION_ID;
@@ -58,9 +59,13 @@ function Dashboard() {
     const checkUser = async () => {
       try {
         const userData = await getUserData();
-        if (!localStorage.getItem('loggedIn') && userData) {
-          toast.success(`Welcome, ${userData.name}`);
-          localStorage.setItem('loggedIn', 'true');
+        if (!localStorage.getItem('loggedIn')) {
+          if (userData) {
+            toast.success(`Welcome, ${userData.name}`);
+            localStorage.setItem('loggedIn', 'true');
+          } else {
+            navigate("/");
+          }
         }
       } catch (error) {
         navigate("/");
@@ -88,27 +93,54 @@ function Dashboard() {
     fetchDocuments();
   }, [user]);
 
-  // Create user preferences
+  // Create user preferences (ensures only one exists)
   const createPrefs = async () => {
     if (!user) return;
     
     try {
-      const date = new Date();
-      await databases.createDocument(
+      // First check if any preferences exist
+      const existingPrefs = await databases.listDocuments(
         DATABASE_ID,
         PREF_COLLECTION_ID,
-        'unique()',
-        {
-          theme: "light",
-          notifications: true,
-          userid: user.$id,
-          usedFreeTrial: false,
-          TimeActivatedTrial: date,
-          plan: "free",
-        },
-        ["read(\"any\")"]
+        [Query.equal("userid", user.$id)]
       );
-      localStorage.setItem('prefsCreated', 'true');
+
+      // If no preferences exist, create one
+      if (existingPrefs.documents.length === 0) {
+        const date = new Date();
+        await databases.createDocument(
+          DATABASE_ID,
+          PREF_COLLECTION_ID,
+          'unique()',
+          {
+            theme: "light",
+            notifications: true,
+            userid: user.$id,
+            usedFreeTrial: false,
+            TimeActivatedTrial: date,
+            plan: "free",
+          }
+        );
+        localStorage.setItem('prefsCreated', 'true');
+      }
+      // If multiple preferences exist, delete extras
+      else if (existingPrefs.documents.length > 1) {
+        // Keep the first one and delete the rest
+        const prefsToKeep = existingPrefs.documents[0];
+        
+        for (let i = 1; i < existingPrefs.documents.length; i++) {
+          await databases.deleteDocument(
+            DATABASE_ID,
+            PREF_COLLECTION_ID,
+            existingPrefs.documents[i].$id
+          );
+        }
+        
+        setPreferences([prefsToKeep]);
+        setPrefsId(prefsToKeep.$id);
+        localStorage.setItem('prefsId', prefsToKeep.$id);
+        setPlan(prefsToKeep.plan);
+      }
     } catch (error) {
       console.error("Error creating preferences:", error);
     }
@@ -116,101 +148,38 @@ function Dashboard() {
 
   // Fetch user preferences
   const fetchPrefs = async () => {
-    if (!user) return;
-
     try {
-      const response = await databases.listDocuments(
-        DATABASE_ID,
-        PREF_COLLECTION_ID,
-        [Query.equal("userid", user.$id)]
-      );
-
-      if (response.documents.length === 0) {
-        if (!localStorage.getItem('prefsCreated')) {
-          await createPrefs();
-        }
-      } else {
-        setPreferences(response.documents);
-        setPrefsId(response.documents[0].$id);
-        localStorage.setItem('prefsId', response.documents[0].$id);
-        setPlan(response.documents[0].plan);
+      const prefsID = localStorage.getItem("prefsId");
+  
+      if (!prefsID) {
+        console.error("No prefs ID found in local storage");
+        createPrefs();
+        return;
       }
-    } catch (error) {
-      console.error("Error fetching preferences:", error);
-    }
-  };
-
-  // Check user preferences and trial status
-  useEffect(() => {
-    if (user) {
-      fetchPrefs();
-      checkUserUsedFreeTrial();
-      checkFreeTrialOver();
-    }
-  }, [user]);
-
-  // Check free trial status
-  const checkUserUsedFreeTrial = async () => {
-    if (!user) return;
-    
-    try {
-      const response = await databases.listDocuments(
+  
+      // Get the document by ID (remove Query.equal since it's not supported in getDocument)
+      const prefsResponse = await databases.getDocument(
         DATABASE_ID,
         PREF_COLLECTION_ID,
-        [Query.equal("userid", user.$id)]
+        prefsID
       );
   
-      if (response.documents && response.documents.length > 0) {
-        const userPrefs = response.documents[0];
-        const usedFreeTrial = userPrefs.usedFreeTrial || false;
-        const timeActivatedTrial = userPrefs.TimeActivatedTrial;
-        if (!usedFreeTrial && timeActivatedTrial) {
-          const date = new Date();
-          const diffTime = Math.abs(date - new Date(timeActivatedTrial));
-          if (diffTime > 1000 * 60 * 60 * 24 * 14) { // 14 days in milliseconds
-            await databases.updateDocument(
-              DATABASE_ID,
-              PREF_COLLECTION_ID,
-              userPrefs.$id,
-              { usedFreeTrial: true }
-            );
-            toast.error("Your free trial is over.");
-          } else {
-            localStorage.setItem("firstTime", "true");
-          }
-        }
-        setPlan(userPrefs.plan);
+      if (!prefsResponse) {
+        console.error("No preferences found");
+        createPrefs();
+        return;
       }
+  
+      setPreferences(prefsResponse);
+      console.log(prefsResponse);
     } catch (error) {
-      console.error("Error checking user free trial:", error);
+      console.warn("Error fetching preferences:", error);
     }
   };
-
-  // Check if free trial is over
-  const checkFreeTrialOver = async () => {
-    if (!prefsId || !user) return;
-    
-    try {
-      const response = await databases.getDocument(
-        DATABASE_ID,
-        PREF_COLLECTION_ID,
-        prefsId
-      );
-      
-      const dateActivated = response.TimeActivatedTrial;
-      const date = new Date();
-      const diffTime = Math.abs(date - new Date(dateActivated));
-      
-      // Needs actual logic to determine trial period
-      if (diffTime > 1000 * 60 * 60 * 24 * 7) { // 7 days in milliseconds
-        return true;
-      }
-      return false;
-    } catch (error) {
-      console.error("Error checking free trial status:", error);
-    }
-  };
-
+  
+  useEffect(() => {
+    fetchPrefs();
+  }, [user]);
   // Verify user authentication from localStorage
   const verifyLocalStorage = () => {
     try {
