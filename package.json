@@ -22,7 +22,7 @@
     "@tinymce/tinymce-react": "^5.1.1",
     "@types/is-hotkey": "^0.1.10",
     "appwrite": "^16.1.0",
-    "axios": "^1.7.9",
+    "axios": "^1.8.2",
     "framer-motion": "^12.4.7",
     "lucide-react": "^0.475.0",
     "node-appwrite": "^15.0.1",
