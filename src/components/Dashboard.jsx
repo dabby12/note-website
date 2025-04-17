@@ -150,7 +150,6 @@ function Dashboard() {
   const fetchPrefs = async () => {
     try {
       const prefsID = localStorage.getItem("prefsId");
-  
       if (!prefsID) {
         console.error("No prefs ID found in local storage");
         createPrefs();
@@ -208,9 +207,13 @@ function Dashboard() {
   };
 
   const handleSettings = async () => {
-    if (preferences.length > 0) {
-      navigate(`/settings/${preferences[0].$id}`);
+    const data = localStorage
+    if (data === null) {
+      console.error("No data found in local storage");
+      navigate("/");
+      return;
     }
+    navigate(`/settings/${user.$id}`);
   };
 
   const handleSelectDocument = (docId) => {
@@ -269,7 +272,6 @@ function Dashboard() {
     }
     return <p>{content}</p>;
   };
-
   return (
     <div className="flex flex-col items-center h-screen bg-light-blue-50">
       <h1 className="text-3xl font-bold mt-4 animate-fade-in text-light-blue-800 font-handwriting">Welcome, {user?.name}!</h1>

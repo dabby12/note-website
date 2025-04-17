@@ -99,6 +99,13 @@ export default {
           800: '#1f2937',
           900: '#111827',
         },
+        'flame-red': {
+          100: '#FFB5A7', // soft highlight
+          300: '#F89E6F', // peachy mid-tone
+          500: '#E75A6C', // main brand red
+          700: '#7C1F1F', // deep red shadow
+          900: '#2C1212', // almost black red
+        },
       },
       animation: {
         'spin-slow': 'spin 3s linear infinite',
