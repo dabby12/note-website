@@ -6,7 +6,7 @@ export default {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {
+    extend: { 
       fontFamily: {
         pacifico: ['Pacifico', 'cursive'],
         sacramento: ['Sacramento', 'cursive'],

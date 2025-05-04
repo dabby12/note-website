@@ -2,25 +2,28 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from "../Special/Sidebar.jsx";
 import { ToastContainer, toast } from 'react-toastify';
-import { account, databases } from "../../api/appwrite.config.js";
+import { account, databases, storage } from "../../api/appwrite.config.js"; // Import Appwrite Storage
 import { Query } from "appwrite";
 import { CheckCircle, Clock } from "lucide-react"; // Icons
+import Popup from 'reactjs-popup';
+import profilePicDefault from "../../assets/miku.jpg";
 
 function UserAccount() {
     const navigate = useNavigate();
     const [email, setEmail] = useState('');
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const [newPassword, setNewPassword] = useState(''); // Added new state for new password
+    const [newPassword, setNewPassword] = useState('');
     const [localUserData, setLocalUserData] = useState(null);
-    const [planStatus, setPlanStatus] = useState('checking'); // "active", "expired", "checking"
-    
+    const [planStatus, setPlanStatus] = useState('checking');
+    const [profilePic, setProfilePic] = useState(profilePicDefault); // Default profile pic
+
     const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID;
     const PREF_COLLECTION_ID = import.meta.env.VITE_APPWRITE_PREF_COLLECTION_ID;
-    
+    const PROFILE_PICTURE_BUCKET_ID = import.meta.env.VITE_APPWRITE_PROFILE_PICTURE_BUCKET_ID;
     const userID = JSON.parse(localStorage.getItem('user'))?.$id;
 
-    // ✅ Fetch User Preferences
+    // Fetch User Preferences
     const fetchPrefs = async () => {
         try {
             const response = await databases.listDocuments(DATABASE_ID, PREF_COLLECTION_ID, [
@@ -30,13 +33,17 @@ function UserAccount() {
             if (response.documents.length > 0) {
                 const userPlan = response.documents[0].usedFreeTrial;
                 setPlanStatus(userPlan ? "active" : "expired");
+            } else {
+                setPlanStatus("expired");
             }
         } catch (error) {
             console.error("Error fetching documents:", error);
+            setPlanStatus("expired");
         }
     };
 
-    // ✅ Fetch User Details
+
+    // Fetch User Details
     const getUser = async () => {
         try {
             const userData = await account.get();
@@ -53,7 +60,7 @@ function UserAccount() {
         fetchPrefs();
     }, []);
 
-    // ✅ Logout Function
+    // Logout Function
     const handleLogout = async () => {
         try {
             await account.deleteSession("current");
@@ -65,7 +72,7 @@ function UserAccount() {
         }
     };
 
-    // ✅ Update Email
+    // Update Email
     const updateEmail = async () => {
         if (!password) {
             toast.error("Please enter your password to update the email.");
@@ -82,7 +89,7 @@ function UserAccount() {
         }
     };
 
-    // ✅ Update Password
+    // Update Password
     const updatePassword = async () => {
         if (!newPassword) {
             toast.error("Please enter a new password.");
@@ -98,42 +105,44 @@ function UserAccount() {
             return false;
         }
     };
-    
+
+    // Update Username
     const updateUsername = async () => {
         try {
             const result = await account.updateName(username);
             setUsername(result.name);
             toast.success("Username updated successfully");
             return true;
-        } catch(error) {
+        } catch (error) {
             console.error("Failed to update username:", error);
             toast.error("Failed to update username");
             return false;
         }
-    }
-    
+    };
+
+    // Save Changes
     const handleSave = async () => {
         try {
             let hasUpdates = false;
-            
+
             // Check if username is changed and not empty
             if (username && username !== localUserData?.name) {
                 const usernameUpdated = await updateUsername();
                 hasUpdates = hasUpdates || usernameUpdated;
             }
-            
+
             // Check if email is changed and not empty
             if (email && email !== localUserData?.email && password) {
                 const emailUpdated = await updateEmail();
                 hasUpdates = hasUpdates || emailUpdated;
             }
-            
+
             // Check if new password is provided
             if (newPassword) {
                 const passwordUpdated = await updatePassword();
                 hasUpdates = hasUpdates || passwordUpdated;
             }
-            
+
             if (hasUpdates) {
                 toast.success("Profile updated successfully");
                 // Clear fields after successful update
@@ -144,12 +153,31 @@ function UserAccount() {
             } else if (!username && !email && !newPassword) {
                 toast.info("No changes were made to your profile");
             }
-        } catch(error) {
+        } catch (error) {
             console.error("Error updating profile:", error);
             toast.error("Failed to update profile");
         }
-    }
-    
+    };
+
+    // Handle Profile Picture Upload
+    const handleProfilePicUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        try {
+            const fileUploaded = await storage.createFile(
+                PROFILE_PICTURE_BUCKET_ID, // Your Appwrite Bucket ID
+                file.name,
+                file
+            );
+            const filePreviewUrl = storage.getFilePreview(import.meta.env.PROFILE_PICTURE_BUCKET_ID, fileUploaded.$id);
+            setProfilePic(filePreviewUrl.href);
+        } catch (error) {
+            console.error("Error uploading file:", error);
+            toast.error("Failed to upload profile picture");
+        }
+    };
+
     return (
         <>
             <div className="flex min-h-screen">
@@ -178,27 +206,84 @@ function UserAccount() {
                         </div>
                     </div>
 
-                    {/* ✅ Aesthetic Plan Display */}
+                    {/* Profile Picture */}
+                    <div>
+                        <p className='text-light-blue-400 font-bold mb-4'>Profile picture</p>
+                        <Popup
+                            trigger={
+                                <img
+                                    src={profilePic}
+                                    alt="Profile"
+                                    className="w-16 h-16 rounded-full mb-4 ml-0 cursor-pointer hover:opacity-80 transition"
+                                />
+                            }
+                            modal
+                            nested
+                        >
+                            {close => (
+                                <div className="bg-white p-6 rounded-lg shadow-lg w-80">
+                                    <h2 className="text-xl font-bold mb-4 text-center">Change Profile Picture</h2>
+
+                                    {/* Default image */}
+                                    <div className="flex justify-center mb-6">
+                                        <img
+                                            src={profilePicDefault}
+                                            alt="Default Profile"
+                                            className="w-20 h-20 rounded-full cursor-pointer hover:ring-4 hover:ring-blue-400 transition"
+                                            onClick={() => {
+                                                setProfilePic(profilePicDefault);
+                                                close();
+                                            }}
+                                        />
+                                    </div>
+
+                                    {/* Divider */}
+                                    <div className="text-gray-400 text-center my-4">or upload your own</div>
+
+                                    {/* File Upload */}
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleProfilePicUpload}
+                                        className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4
+                                            file:rounded-full file:border-0
+                                            file:text-sm file:font-semibold
+                                            file:bg-blue-50 file:text-blue-700
+                                            hover:file:bg-blue-100"
+                                    />
+
+                                    {/* Cancel button */}
+                                    <button
+                                        className="mt-6 w-full px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                                        onClick={close}
+                                    >
+                                        Cancel
+                                    </button>
+                                </div>
+                            )}
+                        </Popup>
+                    </div>
+
                     <div className="mb-4 p-4 bg-white shadow-md rounded-lg flex items-center gap-4">
                         {planStatus === "expired" ? (
                             <>
                                 <CheckCircle className="text-light-blue-400 w-6 h-6" />
                                 <span className="text-lg font-semibold text-light-blue-800">Free Plan</span>
                             </>
-                            
                         ) : planStatus === "active" ? (
                             <>
                                 <CheckCircle className="text-green-500 w-6 h-6" />
                                 <span className="text-lg font-semibold text-green-600">Free Trial Active</span>
                             </>
-                        ) : (
+                        ) : planStatus === "checking" ? (
                             <>
                                 <Clock className="text-yellow-500 w-6 h-6 " />
                                 <span className="text-lg font-semibold text-yellow-600">Checking Plan...</span>
                             </>
-                        )}
+                        ) : null}
                     </div>
-                    
+
+
                     {/* Profile Settings */}
                     <h2 className="text-xl font-semibold mb-2">Profile Settings</h2>
                     <div className="mb-4 block text-gray-700 font-medium">
@@ -236,13 +321,13 @@ function UserAccount() {
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                 />
-                                <label className='block text-gray-700 mt-3'>New username</label>
-                                <input 
-                                type='text'
-                                className='w-full p-2 border border-gray-300 rounded mt-1'
-                                placeholder='Enter your new username'
-                                value={username}
-                                onChange={(e) => setUsername(e.target.value)}
+                                <label className='block text-gray-700 mt-3'>New Username</label>
+                                <input
+                                    type='text'
+                                    className='w-full p-2 border border-gray-300 rounded mt-1'
+                                    placeholder='Enter your new username'
+                                    value={username}
+                                    onChange={(e) => setUsername(e.target.value)}
                                 />
                             </div>
                             <div className="mb-4">

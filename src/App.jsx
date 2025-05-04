@@ -11,7 +11,7 @@ import NewNote from "./components/NewNote";
 import Settings from "./components/Settings";
 import UserAccount from "./components/Settings/UserAccount";
 import AppPreferences from "./components/Settings/AppPreferences";
-import PrivacySecurity from "./components/Settings/PrivacySecurity";
+import PrivacySecurity from "./components/Settings/PrivacySecurity";  
 import LandingPage from "./components/LandingPage/LandingPage";
 import Pricing from "./components/LandingPage/Pricing";
 import Features from "./components/LandingPage/Features";
@@ -19,10 +19,9 @@ import FAQ from "./components/LandingPage/FAQ";
 import NotDone from "./components/NotDone"
 import Payment from "./components/Payment"
 function App() {
-console.log("Made with ❤️ by @dabby12, hope you enjoy! Funny how its built by a 13 year old 😂");
-console.log("If you have any questions, feel free to ask me on Discord Make_aguess");
-console.log("Tech Stack: React, TailwindCSS, Appwrite, Vite");
-  
+//console.log("Made with ❤️ by @dabby12, hope you enjoy! Funny how its built by a 13 year old 😂");
+//console.log("Tech Stack: React, TailwindCSS, Appwrite, Vite");
+//console.log("If you have any questions, feel free to ask me on Discord Make_aguess");
   return (
     <Router>
       <Routes>

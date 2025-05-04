@@ -1,9 +1,12 @@
-// src/components/EditScreen.jsx
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { account, databases } from '../api/appwrite.config.js';
 import { Save, Trash2, X } from 'lucide-react';
 import { AiOutlinePlus } from "react-icons/ai";
+
+// Slate 
+import { createEditor } from 'slate';
+import { Slate, Editable, withReact } from 'slate-react';
 
 const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID;
 const COLLECTION_ID = import.meta.env.VITE_APPWRITE_COLLECTION_ID;
@@ -16,8 +19,16 @@ function EditScreen() {
   const [error, setError] = useState(null);
   const [tagInput, setTagInput] = useState('');
   const [tags, setTags] = useState([]);
-  const [editableContent, setEditableContent] = useState('');
   
+  // Slate editor setup
+  const [editor] = useState(() => withReact(createEditor()));
+  const [value, setValue] = useState([
+    {
+      type: 'paragraph',
+      children: [{ text: '' }],
+    },
+  ]);
+
   useEffect(() => {
     const fetchNote = async () => {
       try {
@@ -25,23 +36,32 @@ function EditScreen() {
         const response = await databases.getDocument(DATABASE_ID, COLLECTION_ID, id);
         console.log('Fetched note:', response);
         const formattedDate = new Date(response.Date).toISOString().split('T')[0];
-        
-        // Convert JSON content to editable string
-        let contentString = '';
-        if (typeof response.Content === 'string') {
-          try {
-            const parsedContent = JSON.parse(response.Content);
-            contentString = parsedContent.map(block => 
-              block.children?.map(child => child.text).join('')
-            ).join('\n');
-          } catch (error) {
-            contentString = response.Content;
+
+        // Convert JSON content to Slate value
+        let slateContent = [{
+          type: 'paragraph',
+          children: [{ text: response.Content || '' }],
+        }];
+
+        try {
+          const parsed = JSON.parse(response.Content);
+          if (Array.isArray(parsed)) {
+            slateContent = parsed;
+          } else {
+            slateContent = [{
+              type: 'paragraph',
+              children: [{ text: parsed.toString() }],
+            }];
           }
-        } else {
-          contentString = String(response.Content || '');
+        } catch (e) {
+          // Fallback to plain text if parsing fails
+          slateContent = [{
+            type: 'paragraph',
+            children: [{ text: response.Content || '' }],
+          }];
         }
-        
-        setEditableContent(contentString);
+
+        setValue(slateContent);
         setNote({ ...response, Date: formattedDate });
         setTags(response.tags || []);
       } catch (error) {
@@ -51,24 +71,16 @@ function EditScreen() {
         setLoading(false);
       }
     };
-  
+
     fetchNote();
   }, [id]);
-  
-  const handleContentChange = (e) => {
-    setEditableContent(e.target.value);
-  };
 
   const handleSave = async () => {
     try {
       console.log('Saving note:', note);
       
-      // Convert editable content back to JSON format
-      const contentLines = editableContent.split('\n');
-      const jsonContent = JSON.stringify(contentLines.map(line => ({
-        type: 'paragraph',
-        children: [{ text: line }]
-      })));
+      // Convert editor content back to JSON
+      const jsonContent = JSON.stringify(value);
       
       const { $databaseId, $collectionId, ...noteData } = note;
       const result = await databases.updateDocument(
@@ -90,7 +102,6 @@ function EditScreen() {
     }
   };
 
-  // [Rest of your existing functions: handleDelete, handleCancel, etc.]
   const handleDelete = async () => {
     try {
       console.log('Deleting note with ID:', id);
@@ -148,18 +159,24 @@ function EditScreen() {
             className="w-full p-2 mb-4 border rounded"
             placeholder="Description"
           />
-          <textarea
-            value={editableContent}
-            onChange={handleContentChange}
-            className="w-full p-2 mb-4 border rounded min-h-[200px]"
-            placeholder="Content"
-          />
+          
+          {/* Slate editor for content */}
+          <div className="w-full p-2 mb-4 border rounded min-h-[200px]">
+            <Slate editor={editor} value={value} onChange={newValue => setValue(newValue)} initialValue={value}>
+              <Editable
+                placeholder="Enter your content here..."
+                className="min-h-[200px] p-2"
+              />
+            </Slate>
+          </div>
+          
           <input
             type="date"
             value={note.Date}
             onChange={(e) => setNote({ ...note, Date: e.target.value })}
             className="w-full p-2 mb-4 border rounded"
           />
+          
           <div className="mb-4">
             <label className="block text-gray-700">Tags:</label>
             <div className="flex items-center mb-2">
@@ -187,6 +204,7 @@ function EditScreen() {
               ))}
             </div>
           </div>
+
           <div className="flex justify-between mt-4">
             <button onClick={handleSave} className="bg-blue-500 text-white px-4 py-2 rounded flex items-center">
               <Save className="mr-2" /> Save

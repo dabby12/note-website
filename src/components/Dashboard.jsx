@@ -13,7 +13,7 @@ import { IoSettings } from "react-icons/io5";
 import { GrLogout } from "react-icons/gr";
 
 // Assets
-import miku from "../assets/miku.jpg";
+import miku from "../assets/miku.jpg"
 
 
 // Environment variables
@@ -151,7 +151,7 @@ function Dashboard() {
     try {
       const prefsID = localStorage.getItem("prefsId");
       if (!prefsID) {
-        console.error("No prefs ID found in local storage");
+        console.warn("No prefs ID found in local storage");
         createPrefs();
         return;
       }
@@ -299,7 +299,6 @@ function Dashboard() {
                   <li className="p-2 border-b rounded-md">{doc.Description}</li>
                   <li className="p-2 border-b">{renderContent(doc.Content)}</li>
                   <li className="p-2 border-b">{formatDate(doc.Date)}</li>
-                  <li className="p-2 border-b">{doc.$id}</li>
 
                   {doc.tags && doc.tags.length > 0 && (
                     <div className="p-2 border-b">

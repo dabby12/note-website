@@ -7,6 +7,9 @@ export default defineConfig({
   plugins: [react(), sentryVitePlugin({
     org: "make-aguess",
     project: "javascript-react"
+  }), sentryVitePlugin({
+    org: "make-aguess",
+    project: "javascript-react"
   })],
 
   build: {
