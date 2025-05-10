@@ -18,9 +18,9 @@ This is a Vite + React project that includes various features such as user authe
     cd vite-project
     ```
 
-2. Install dependencies:
+2. Install dependencies (using pnpm):
     ```sh
-    npm install
+    pnpm install
     ```
 
 3. Create a `.env` file in the root directory and add your Appwrite project details:
@@ -37,7 +37,7 @@ This is a Vite + React project that includes various features such as user authe
 
 4. Start the development server:
     ```sh
-    npm run dev
+    pnpm run dev
     ```
 
 ## Scripts
