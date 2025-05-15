@@ -29,6 +29,7 @@ function Dashboard() {
   const [preferences, setPreferences] = useState([]);
   const [prefsId, setPrefsId] = useState(null);
   const [plan, setPlan] = useState(null);
+  const [date, setDate] = useState("");
   
   const navigate = useNavigate();
 
@@ -85,6 +86,11 @@ function Dashboard() {
           Query.equal("userID", [user.$id]),
         ]);
         setDocuments(response.documents);
+        if (response.documents.length > 0) {
+          setDate(response.documents[0].Date); // Store the first document's date
+        }
+        
+        console.log(response.documents);
       } catch (error) {
         console.error("Error fetching documents:", error);
       }
@@ -119,6 +125,7 @@ function Dashboard() {
             usedFreeTrial: false,
             TimeActivatedTrial: date,
             plan: "free",
+            custom_theme: false,
           }
         );
         localStorage.setItem('prefsCreated', 'true');
@@ -174,7 +181,7 @@ function Dashboard() {
     } catch (error) {
       console.warn("Error fetching preferences:", error);
     }
-  };
+  }; 
   
   useEffect(() => {
     fetchPrefs();
@@ -254,6 +261,7 @@ function Dashboard() {
   };
 
   // Helper functions
+  // Format date is not used in the code, but can be useful for other purposes
   const formatDate = (dateString) => {
     const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
     return new Date(dateString).toLocaleDateString(undefined, options);
@@ -272,6 +280,25 @@ function Dashboard() {
     }
     return <p>{content}</p>;
   };
+  const formatDateForNote = (date) => {
+    if (!date) return "Invalid date";
+  
+    try {
+      const parsedDate = new Date(date);
+      return parsedDate.toLocaleString(undefined, {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    } catch (error) {
+      console.error(  "Invalid date format:", date);
+      return "Invalid date";
+    }
+  };
+  
+  formatDateForNote(date);
   return (
     <div className="flex flex-col items-center h-screen bg-light-blue-50">
       <h1 className="text-3xl font-bold mt-4 animate-fade-in text-light-blue-800 font-handwriting">Welcome, {user?.name}!</h1>
@@ -298,7 +325,8 @@ function Dashboard() {
                   <li className="p-2 border-b m-2 font-bold">{doc.Name}</li>
                   <li className="p-2 border-b rounded-md">{doc.Description}</li>
                   <li className="p-2 border-b">{renderContent(doc.Content)}</li>
-                  <li className="p-2 border-b">{formatDate(doc.Date)}</li>
+                  <li className="p-2 border-b">{formatDateForNote(doc.Date)}</li>
+
 
                   {doc.tags && doc.tags.length > 0 && (
                     <div className="p-2 border-b">
@@ -373,7 +401,6 @@ function Dashboard() {
           </MenuItem>
         </MenuList>
       </Menu>
-
       <ToastContainer />
     </div>
   );

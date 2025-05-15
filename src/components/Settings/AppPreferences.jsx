@@ -9,7 +9,9 @@ import Sidebar from "../Special/Sidebar";
 function AppPreferences() {
   const [userData, setUserData] = useState(null);
   const [preferences, setPreferences] = useState([]);
-  const [prefsId, setPrefsId] = useState(null); // Store document ID in state
+  const [prefsId, setPrefsId] = useState(null);
+  const [seasonTheme, setSeasonTheme] = useState(false);
+
   const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID;
   const PREFS_COLLECTION_ID = import.meta.env.VITE_APPWRITE_PREF_COLLECTION_ID;
 
@@ -25,72 +27,81 @@ function AppPreferences() {
         toast.error("Failed to fetch user data.");
       }
     };
-
     fetchUserData();
   }, []);
+const fetchPreferences = async () => {
+  const response = await databases.listDocuments(
+    DATABASE_ID,
+    PREFS_COLLECTION_ID,
+    [Query.equal("user_id", userData.$id)]
+  );
 
-  useEffect(() => {
-    if (!userData) return;
+  if (response.documents.length > 0) {
+    setPreferences(response.documents);
+    setPrefsId(response.documents[0].$id);
+    setSeasonTheme(response.documents[0].season_theme || false);
+  } else {
+    console.log("No preferences found for this user.");
+  }
+  return response.documents;
+}
 
-    const fetchPreferences = async () => {
-      try {
-        const fetchedPrefs = await databases.listDocuments(
-          DATABASE_ID,
-          PREFS_COLLECTION_ID,
-          [Query.equal("userid", userData.$id)]
-        );
-
-        if (fetchedPrefs.documents.length > 0) {
-          setPreferences(fetchedPrefs.documents);
-          const docId = fetchedPrefs.documents[0].$id;
-          setPrefsId(docId); // Store the document ID in state 
-        }
-      } catch (error) {
-        console.error("Error fetching preferences:", error);
-        toast.error("Failed to fetch preferences.");
+const createPrefs = async () => {
+  try {
+    const newPrefs = await databases.createDocument(
+      DATABASE_ID,
+      PREFS_COLLECTION_ID,
+      ID.unique(),
+      {
+        user_id: userData.$id,
+        theme: "light",
+        notifications: true,
+        season_theme: false,
       }
-    };
+    );
+    setPreferences([newPrefs]);
+    setPrefsId(newPrefs.$id);
+    setSeasonTheme(false);
+    toast.success("Preferences created successfully!");
+  } catch (error) {
+    console.error("Error creating preferences:", error);
+    toast.error("Failed to create preferences.");
+  }
+}
 
-    fetchPreferences();
-  }, [userData]);
-  const createPrefs = async () => {
-    if (!userData) return;
-    
-    try {
-      const response = await databases.createDocument(
-        DATABASE_ID,
-        PREFS_COLLECTION_ID,
-        ID.unique(),
-        {
-          userid: userData.$id,
-          theme: "light",
-          notifications: true,
-          usedFreeTrial: true
-        }
-      );
-
-      setPreferences([...preferences, response]);
-      setPrefsId(response.$id); // Store new prefs ID
-      toast.success("Preferences created successfully!");
-    } catch (error) {
-      console.error("Error creating preferences:", error);
-      toast.error("Error creating preferences.");
+useEffect(() => {
+  const checkPrefs = async () => {
+    const prefs = await fetchPreferences();
+    if (prefs.length === 0) {
+      console.log("No prefs found, creating new prefs");
+      await createPrefs();
     }
   };
-useEffect(() => {
-    if (preferences.length === 0) {
-      createPrefs();
-    }
-  }, [preferences]);
+
+  if (userData) {
+    checkPrefs();
+  }
+}, [userData]);x``
+// steps to rewrite fetchPreferences and createPrefs
+
   const handleUpdate = async (id, field, value) => {
     try {
+      let updatedValue = value;
+      if (field === "notifications" || field === "season_theme") {
+        updatedValue = value === "true" || value === true;
+      }
+
       await databases.updateDocument(DATABASE_ID, PREFS_COLLECTION_ID, id, {
-        [field]: value,
+        [field]: updatedValue,
       });
 
       setPreferences((prev) =>
-        prev.map((pref) => (pref.$id === id ? { ...pref, [field]: value } : pref))
+        prev.map((pref) => (pref.$id === id ? { ...pref, [field]: updatedValue } : pref))
       );
+
+      if (field === "season_theme") {
+        setSeasonTheme(updatedValue);
+      }
 
       toast.success(`Updated ${field} successfully!`);
     } catch (error) {
@@ -109,13 +120,14 @@ useEffect(() => {
       const updatedPref = await databases.updateDocument(
         DATABASE_ID,
         PREFS_COLLECTION_ID,
-        prefsId, // Use the state-stored prefsId
+        prefsId,
         {
-          theme: "light",
-          notifications: true,
+          theme: preferences[0]?.theme || "light",
+          notifications: preferences[0]?.notifications ?? true,
+          season_theme: seasonTheme,
         }
       );
-      
+
       setPreferences((prev) =>
         prev.map((pref) => (pref.$id === prefsId ? updatedPref : pref))
       );
@@ -128,89 +140,116 @@ useEffect(() => {
   };
 
   return (
-    <div className="flex flex-col w-full mx-auto p-8 bg-gray-100 dark:bg-gray-900 min-h-screen relative">
-      <Sidebar />
-      <div className="absolute top-4 right-4 flex space-x-4">
-        <button onClick={handleBack} className="flex items-center text-blue-500 bg-blue-100 rounded-md p-2">
-          <MdKeyboardBackspace className="mr-2" />
-          <span>Go back</span>
-        </button>
-        <button className="flex items-center text-white bg-blue-500 rounded-md p-2" onClick={updatePrefs}>
-          <GrSave className="mr-2" />
-          <span>Update Preferences</span>
-        </button>
+    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Sidebar fixed width */}
+      <div className="w-64">
+        <Sidebar />
       </div>
-      <div className="flex-1 ml-8"> 
-        <h1 className="text-4xl font-bold text-center text-gray-800 dark:text-white mb-2">
+
+      {/* Main content fills remaining space */}
+      <main className="flex-1 p-8 overflow-auto">
+        <div className="flex justify-between items-center mb-12">
+          <button
+            onClick={handleBack}
+            className="flex items-center space-x-2 text-blue-600 hover:text-blue-800 transition"
+          >
+            <MdKeyboardBackspace size={24} />
+            <span className="font-semibold">Go Back</span>
+          </button>
+
+          <button
+            onClick={updatePrefs}
+            className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md px-4 py-2 transition"
+          >
+            <GrSave size={20} />
+            <span>Save Preferences</span>
+          </button>
+        </div>
+
+        <h1 className="text-4xl font-extrabold text-center mb-6 text-gray-900 dark:text-white">
           App Preferences
         </h1>
-        <p className="text-lg text-center text-gray-600 dark:text-gray-300 mb-8">
+        <p className="text-center text-gray-600 dark:text-gray-300 mb-10">
           Customize your experience below.
         </p>
 
         {preferences.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8 max-w-3xl mx-auto">
-            {preferences.map((pref) => (
-              <div
-                key={pref.$id}
-                className="bg-white dark:bg-gray-800 shadow-lg rounded-xl p-6 border border-gray-200 dark:border-gray-700"
+          <form
+            className="max-w-3xl mx-auto space-y-8"
+            onSubmit={(e) => {
+              e.preventDefault();
+              updatePrefs();
+            }}
+          >
+            {/* Theme */}
+            <div>
+              <label
+                htmlFor="theme"
+                className="block text-lg font-medium text-gray-700 dark:text-gray-300 mb-2"
               >
-                <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-200 mb-4">
-                  Preference ID: {pref.$id}
-                </h3>
+                Theme
+              </label>
+              <select
+                id="theme"
+                value={preferences[0].theme || "light"}
+                onChange={(e) =>
+                  handleUpdate(preferences[0].$id, "theme", e.target.value)
+                }
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+              </select>
+            </div>
 
-                {/* Theme Selection */}
-                <div className="mb-4">
-                  <label
-                    htmlFor={`theme-${pref.$id}`}
-                    className="block text-lg font-medium text-gray-700 dark:text-gray-300"
-                  >
-                    Theme
-                  </label>
-                  <select
-                    id={`theme-${pref.$id}`}
-                    value={pref.theme || "light"}
-                    onChange={(e) =>
-                      handleUpdate(pref.$id, "theme", e.target.value)
-                    }
-                    className="mt-2 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="light">Light</option>
-                    <option value="dark">Dark</option>
-                  </select>
-                </div>
+            {/* Notifications */}
+            <div>
+              <label
+                htmlFor="notifications"
+                className="block text-lg font-medium text-gray-700 dark:text-gray-300 mb-2"
+              >
+                Notifications
+              </label>
+              <select
+                id="notifications"
+                value={preferences[0].notifications ? "true" : "false"}
+                onChange={(e) =>
+                  handleUpdate(preferences[0].$id, "notifications", e.target.value)
+                }
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="true">On</option>
+                <option value="false">Off</option>
+              </select>
+            </div>
 
-                {/* Notification Settings */}
-                <div className="mb-4">
-                  <label
-                    htmlFor={`notifications-${pref.$id}`}
-                    className="block text-lg font-medium text-gray-700 dark:text-gray-300"
-                  >
-                    Notifications
-                  </label>
-                  <select
-                    id={`notifications-${pref.$id}`}
-                    value={pref.notifications ? "true" : "false"}
-                    onChange={(e) =>
-                      handleUpdate(pref.$id, "notifications", e.target.value)
-                    }
-                    className="mt-2 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="true">On</option>
-                    <option value="false">Off</option>
-                  </select>
-                </div>
-              </div>
-            ))}
-          </div>
+            {/* Season Theme */}
+            <div>
+              <label
+                htmlFor="seasonTheme"
+                className="block text-lg font-medium text-gray-700 dark:text-gray-300 mb-2"
+              >
+                Season Theme
+              </label>
+              <select
+                id="seasonTheme"
+                value={seasonTheme ? "true" : "false"}
+                onChange={(e) =>
+                  handleUpdate(preferences[0].$id, "season_theme", e.target.value)
+                }
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="true">On</option>
+                <option value="false">Off</option>
+              </select>
+            </div>
+          </form>
         ) : (
-          <div className="text-center">
-            <p className="text-gray-500 dark:text-gray-300 text-lg mb-4">
-              No preferences found.
-            </p>
-          </div>
+          <p className="text-center text-gray-500 dark:text-gray-300 text-lg">
+            No preferences found.
+          </p>
         )}
-      </div>
+      </main>
     </div>
   );
 }

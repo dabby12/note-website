@@ -106,6 +106,31 @@ export default {
           700: '#7C1F1F', // deep red shadow
           900: '#2C1212', // almost black red
         },
+        spring: {
+          pink: '#FADADD',       // Blush Pink – cherry blossoms
+          mint: '#B2E2BD',       // Mint Green – fresh leaves
+          sky: '#A0D8EF',        // Sky Blue – clear sky
+          lavender: '#C3B1E1',   // Lavender – floral
+        },
+        summer: {
+          yellow: '#FFE066',     // Sunshine Yellow – sun
+          coral: '#FF6F59',      // Coral Orange – beach
+          ocean: '#2E86AB',      // Ocean Blue – sea
+          leaf: '#4CAF50',       // Leaf Green – foliage
+        },
+        autumn: {
+          pumpkin: '#D2691E',    // Pumpkin Orange – fall leaves
+          burgundy: '#800020',   // Deep Burgundy – harvest
+          mustard: '#FFB627',    // Mustard Yellow – golden hues
+          forest: '#4E342E',     // Forest Brown – earth
+        },
+        winter: {
+          ice: '#B3DDF2',        // Ice Blue – frost
+          navy: '#1A1A40',       // Midnight Navy – night
+          silver: '#D3D3D3',     // Silver Gray – sky
+          cranberry: '#8B0000',  // Cranberry Red – holiday
+        },
+        
       },
       animation: {
         'spin-slow': 'spin 3s linear infinite',

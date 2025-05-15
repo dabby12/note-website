@@ -39,7 +39,24 @@ This is a Vite + React project that includes various features such as user authe
     ```sh
     npm run dev
     ```
-
+```
+5. Create a schema in Appwrite for the following
+    5a. Database: 
+        Create 2 collections named preferences and notes
+    5b. preferences collection schema:
+        TimeActivatedTrial: datetime
+        plan: string
+        theme: string
+        notifications: boolean
+        userid: string
+        usedFreeTrial: boolean
+    5c. notes collection schema
+        Name: string
+        Descripton: string
+        Content: string
+        Date: datetime
+        userid:
+```
 ## Scripts
 
 - `npm run dev`: Starts the development server.

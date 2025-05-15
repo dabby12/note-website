@@ -15,7 +15,7 @@ const Login = () => {
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
     const [rememberMe, setRememberMe] = useState(false);
-    const [domain, setDomain] = useState("test");
+    const [domain, setDomain] = useState("");
     // Handle Login with Email & Password
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -53,7 +53,7 @@ const Login = () => {
             );
             navigate("/dashboard");
         } catch (error) {
-            console.error("Google Login Error:", error);
+            console.error("Google Login Error domain: " + domain, error);
             setError("Google login failed. Try again.");
         } finally {
             setLoading(false);

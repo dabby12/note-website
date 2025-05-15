@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from "../Special/Sidebar.jsx";
 import { ToastContainer, toast } from 'react-toastify';
-import { account, databases, storage } from "../../api/appwrite.config.js"; // Import Appwrite Storage
+import { account, databases, storage} from "../../api/appwrite.config.js"; 
 import { Query } from "appwrite";
 import { CheckCircle, Clock } from "lucide-react"; // Icons
 import Popup from 'reactjs-popup';
@@ -17,6 +17,8 @@ function UserAccount() {
     const [localUserData, setLocalUserData] = useState(null);
     const [planStatus, setPlanStatus] = useState('checking');
     const [profilePic, setProfilePic] = useState(profilePicDefault); // Default profile pic
+    const [userid, setuserid] = useState("")
+    const [domainName, setDomianName] = useState("")
 
     const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID;
     const PREF_COLLECTION_ID = import.meta.env.VITE_APPWRITE_PREF_COLLECTION_ID;
@@ -49,6 +51,7 @@ function UserAccount() {
             const userData = await account.get();
             setEmail(userData.email);
             setUsername(userData.name || '');
+            setuserid(userData.$id)
             setLocalUserData(userData);
         } catch (error) {
             console.error("Failed to fetch user data:", error);
@@ -158,26 +161,43 @@ function UserAccount() {
             toast.error("Failed to update profile");
         }
     };
-
-    // Handle Profile Picture Upload
-    const handleProfilePicUpload = async (e) => {
+    console.log(userid)
+    // function to handle file upload
+    const profilePicUpload= async (e) => {
+        try {
+            const promise = storage.createFile(
+                PROFILE_PICTURE_BUCKET_ID,
+                userid,
+                fileUrl
+            );
+            promise.then(function (response) {
+                    console.log(response); // Success
+                }, function (error) {
+                    console.log(error); // Failure
+                });
+        } catch (error) {
+            console.log(error)
+        }
+    }
+    // Handle Profile Picture Upload (Locally)
+    const handleProfilePicUpload = (e) => {
         const file = e.target.files[0];
         if (!file) return;
 
-        try {
-            const fileUploaded = await storage.createFile(
-                PROFILE_PICTURE_BUCKET_ID, // Your Appwrite Bucket ID
-                file.name,
-                file
-            );
-            const filePreviewUrl = storage.getFilePreview(import.meta.env.PROFILE_PICTURE_BUCKET_ID, fileUploaded.$id);
-            setProfilePic(filePreviewUrl.href);
-        } catch (error) {
-            console.error("Error uploading file:", error);
-            toast.error("Failed to upload profile picture");
-        }
-    };
+        // Create a local URL for the uploaded image file
+        const fileUrl = URL.createObjectURL(file);
 
+        // Update the profile picture state with the local URL
+        setProfilePic(fileUrl);
+    };
+    const getDomain = () => {
+        const domain = window.location.href 
+        console.log(domain)
+    }
+    useEffect(() => {
+        getDomain()
+    }, []);
+    console.log(profilePic)
     return (
         <>
             <div className="flex min-h-screen">
@@ -282,7 +302,6 @@ function UserAccount() {
                             </>
                         ) : null}
                     </div>
-
 
                     {/* Profile Settings */}
                     <h2 className="text-xl font-semibold mb-2">Profile Settings</h2>
