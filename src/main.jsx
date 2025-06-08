@@ -1,7 +1,7 @@
-import { StrictMode } from 'react';
-import { createRoot } from 'react-dom/client';
-import './index.css';
-import App from './App.jsx';
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import "./index.css";
+import App from "./App.jsx";
 import * as Sentry from "@sentry/react";
 
 Sentry.init({
@@ -9,8 +9,7 @@ Sentry.init({
   sendDefaultPii: true,
   integrations: [
     Sentry.replayIntegration(),
-    Sentry.browserTracingIntegration()
-    
+    Sentry.browserTracingIntegration(),
   ],
   // Session Replay
   replaysSessionSampleRate: 1.0, // This sets the sample rate at 10%. You may want to change it to 100% while in development and then sample at a lower rate in production.
@@ -23,11 +22,11 @@ Sentry.init({
   ],
 });
 
-const container = document.getElementById('root');
+const container = document.getElementById("root");
 const root = createRoot(container);
 
 root.render(
   <StrictMode>
     <App />
-  </StrictMode>
+  </StrictMode>,
 );

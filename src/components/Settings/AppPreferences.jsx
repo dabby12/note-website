@@ -37,7 +37,7 @@ function AppPreferences() {
     const response = await databases.listDocuments(
       DATABASE_ID,
       PREFS_COLLECTION_ID,
-      [Query.equal("userid", userData.$id)]
+      [Query.equal("userid", userData.$id)],
     );
 
     if (response.documents.length > 0) {
@@ -65,7 +65,7 @@ function AppPreferences() {
           usedFreeTrial: true,
           TimeActivatedTrial: new Date().toISOString(),
           plan: "free",
-        }
+        },
       );
       setPreferences([newPrefs]);
       setPrefsId(newPrefs.$id);
@@ -82,7 +82,11 @@ function AppPreferences() {
     try {
       const extras = prefs.slice(1);
       for (const pref of extras) {
-        await databases.deleteDocument(DATABASE_ID, PREFS_COLLECTION_ID, pref.$id);
+        await databases.deleteDocument(
+          DATABASE_ID,
+          PREFS_COLLECTION_ID,
+          pref.$id,
+        );
         console.log("Deleted extra preferences document:", pref.$id);
       }
     } catch (error) {
@@ -123,7 +127,9 @@ function AppPreferences() {
       });
 
       setPreferences((prev) =>
-        prev.map((pref) => (pref.$id === id ? { ...pref, [field]: updatedValue } : pref))
+        prev.map((pref) =>
+          pref.$id === id ? { ...pref, [field]: updatedValue } : pref,
+        ),
       );
 
       if (field === "season_theme") {
@@ -152,11 +158,11 @@ function AppPreferences() {
           theme: preferences[0]?.theme || "light",
           notifications: preferences[0]?.notifications ?? true,
           season_theme: seasonTheme,
-        }
+        },
       );
 
       setPreferences((prev) =>
-        prev.map((pref) => (pref.$id === prefsId ? updatedPref : pref))
+        prev.map((pref) => (pref.$id === prefsId ? updatedPref : pref)),
       );
 
       toast.success("Preferences updated successfully!");
@@ -208,13 +214,18 @@ function AppPreferences() {
           >
             {/* Theme */}
             <div>
-              <label htmlFor="theme" className="block text-lg font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label
+                htmlFor="theme"
+                className="block text-lg font-medium text-gray-700 dark:text-gray-300 mb-2"
+              >
                 Theme
               </label>
               <select
                 id="theme"
                 value={preferences[0].theme || "light"}
-                onChange={(e) => handleUpdate(preferences[0].$id, "theme", e.target.value)}
+                onChange={(e) =>
+                  handleUpdate(preferences[0].$id, "theme", e.target.value)
+                }
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="light">Light</option>
@@ -224,13 +235,22 @@ function AppPreferences() {
 
             {/* Notifications */}
             <div>
-              <label htmlFor="notifications" className="block text-lg font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label
+                htmlFor="notifications"
+                className="block text-lg font-medium text-gray-700 dark:text-gray-300 mb-2"
+              >
                 Notifications
               </label>
               <select
                 id="notifications"
                 value={preferences[0].notifications ? "true" : "false"}
-                onChange={(e) => handleUpdate(preferences[0].$id, "notifications", e.target.value)}
+                onChange={(e) =>
+                  handleUpdate(
+                    preferences[0].$id,
+                    "notifications",
+                    e.target.value,
+                  )
+                }
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="true">On</option>
@@ -240,13 +260,22 @@ function AppPreferences() {
 
             {/* Season Theme */}
             <div>
-              <label htmlFor="seasonTheme" className="block text-lg font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label
+                htmlFor="seasonTheme"
+                className="block text-lg font-medium text-gray-700 dark:text-gray-300 mb-2"
+              >
                 Season Theme
               </label>
               <select
                 id="seasonTheme"
                 value={seasonTheme ? "true" : "false"}
-                onChange={(e) => handleUpdate(preferences[0].$id, "season_theme", e.target.value)}
+                onChange={(e) =>
+                  handleUpdate(
+                    preferences[0].$id,
+                    "season_theme",
+                    e.target.value,
+                  )
+                }
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="true">On</option>
@@ -255,7 +284,9 @@ function AppPreferences() {
             </div>
           </form>
         ) : (
-          <p className="text-center text-gray-500 dark:text-gray-300 text-lg">No preferences found.</p>
+          <p className="text-center text-gray-500 dark:text-gray-300 text-lg">
+            No preferences found.
+          </p>
         )}
       </main>
     </div>

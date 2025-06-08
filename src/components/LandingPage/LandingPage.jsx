@@ -1,16 +1,16 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { motion, useInView } from 'framer-motion';
-import { BookOpenIcon, FolderIcon, CheckCircleIcon } from 'lucide-react';
-import { FaRegLightbulb } from 'react-icons/fa';
-import { createTimeline } from 'animejs';
+import React, { useState, useRef, useEffect } from "react";
+import { motion, useInView } from "framer-motion";
+import { BookOpenIcon, FolderIcon, CheckCircleIcon } from "lucide-react";
+import { FaRegLightbulb } from "react-icons/fa";
+import { createTimeline } from "animejs";
 // App Screenshots (Replace with your actual image imports)
-import AppScreenShot1 from '../../assets/app-screenshot1.png';
-import AppScreenShot2 from '../../assets/app-screenshot2.png';
-import AppScreenShot3 from '../../assets/app-screenshot3.png';
+import AppScreenShot1 from "../../assets/app-screenshot1.png";
+import AppScreenShot2 from "../../assets/app-screenshot2.png";
+import AppScreenShot3 from "../../assets/app-screenshot3.png";
 
 // Typewriter Component
 const Typewriter = ({ speed = 100 }) => {
-  const [displayText, setDisplayText] = useState('');
+  const [displayText, setDisplayText] = useState("");
   const [currentIndex, setCurrentIndex] = useState(0);
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [isTypingComplete, setIsTypingComplete] = useState(false);
@@ -23,7 +23,7 @@ const Typewriter = ({ speed = 100 }) => {
     "Innovate Without Limits     ", // 26 chars
     "Create Amazing Things       ", // 26 chars
     "Sync Across All Devices     ", // 26 chars
-    "Boost Your Productivity     "  // 26 chars
+    "Boost Your Productivity     ", // 26 chars
   ];
 
   useEffect(() => {
@@ -37,7 +37,7 @@ const Typewriter = ({ speed = 100 }) => {
     } else {
       // After finishing typing, wait for a moment before clearing the text
       const clearTimeoutId = setTimeout(() => {
-        setDisplayText('');
+        setDisplayText("");
         setCurrentIndex(0);
         setIsTypingComplete(true);
       }, 1000); // Adjust the delay before clearing the text (e.g., 1000ms = 1 second)
@@ -65,28 +65,29 @@ const Typewriter = ({ speed = 100 }) => {
 function LandingPage() {
   const [activeScreenshot, setActiveScreenshot] = useState(0);
   const screenshots = [AppScreenShot1, AppScreenShot2, AppScreenShot3];
-  const tl = createTimeline({ defaults: { duration: 750 } })
+  const tl = createTimeline({ defaults: { duration: 750 } });
   useEffect(() => {
-  tl.label('start')
-    .add(".header_text", { x: '15rem'}, 500)  
+    tl.label("start").add(".header_text", { x: "15rem" }, 500);
   }, [tl]);
-   
-    
+
   const features = [
     {
       icon: <BookOpenIcon className="w-12 h-12 text-light-blue-600" />,
-      title: 'Unlimited Notes',
-      description: 'Capture and organize unlimited notes across multiple categories and projects.',
+      title: "Unlimited Notes",
+      description:
+        "Capture and organize unlimited notes across multiple categories and projects.",
     },
     {
       icon: <FaRegLightbulb className="w-12 h-12 text-light-green-600" />,
-      title: 'Smart Organization',
-      description: 'AI-powered tagging and smart search to help you find your notes instantly.',
+      title: "Smart Organization",
+      description:
+        "AI-powered tagging and smart search to help you find your notes instantly.",
     },
     {
       icon: <FolderIcon className="w-12 h-12 text-light-blue-600" />,
-      title: 'Cross-Platform Sync',
-      description: 'Seamlessly sync your notes across desktop, mobile, and web platforms.',
+      title: "Cross-Platform Sync",
+      description:
+        "Seamlessly sync your notes across desktop, mobile, and web platforms.",
     },
   ];
 
@@ -104,16 +105,23 @@ function LandingPage() {
 
   const itemVariants = {
     hidden: { opacity: 0, y: 50 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: 'easeOut' } },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.6, ease: "easeOut" },
+    },
   };
 
   // Refs for scroll-triggered animations
   const featuresRef = useRef(null);
   const screenshotRef = useRef(null);
   const featuresInView = useInView(featuresRef, { once: true, amount: 0.2 });
-  const screenshotInView = useInView(screenshotRef, { once: true, amount: 0.2 });
+  const screenshotInView = useInView(screenshotRef, {
+    once: true,
+    amount: 0.2,
+  });
   // Logo
- 
+
   // Animejs stuff
   return (
     <div className="flex flex-col items-center min-h-screen bg-gradient-to-b from-light-blue-200 via-neutral-100 to-light-green-100 text-black px-6">
@@ -133,7 +141,7 @@ function LandingPage() {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="space-x-6 hidden md:flex items-center justify-center flex-1"
         >
-          {['Features', 'Pricing', 'FAQ'].map((item) => (
+          {["Features", "Pricing", "FAQ"].map((item) => (
             <a
               key={item}
               href={`/${item.toLowerCase()}`}
@@ -165,8 +173,8 @@ function LandingPage() {
           <Typewriter speed={100} />
         </h1>
         <p className="text-2xl text-gray-600 mb-8 font-dancing_script">
-          Transform how you capture, organize, and recall your ideas with InkNote's intelligent
-          note-taking platform.
+          Transform how you capture, organize, and recall your ideas with
+          InkNote's intelligent note-taking platform.
         </p>
 
         <motion.div
@@ -194,7 +202,7 @@ function LandingPage() {
       <motion.section
         ref={featuresRef}
         initial="hidden"
-        animate={featuresInView ? 'visible' : 'hidden'}
+        animate={featuresInView ? "visible" : "hidden"}
         variants={containerVariants}
         className="max-w-6xl mt-16 grid md:grid-cols-3 gap-8 px-4 font-Sacramento"
       >
@@ -210,8 +218,12 @@ function LandingPage() {
             }}
           >
             <div className="flex justify-center mb-4 ">{feature.icon}</div>
-            <h3 className="text-xl font-bold mb-2 text-light-blue-800 font-indie_flower">{feature.title}</h3>
-            <p className="text-gray-600 font-handwriting">{feature.description}</p>
+            <h3 className="text-xl font-bold mb-2 text-light-blue-800 font-indie_flower">
+              {feature.title}
+            </h3>
+            <p className="text-gray-600 font-handwriting">
+              {feature.description}
+            </p>
           </motion.div>
         ))}
       </motion.section>
@@ -220,7 +232,9 @@ function LandingPage() {
       <motion.section
         ref={screenshotRef}
         initial={{ opacity: 0, y: 50 }}
-        animate={screenshotInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+        animate={
+          screenshotInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }
+        }
         transition={{ duration: 0.6 }}
         className="mt-16 max-w-4xl"
       >
@@ -228,9 +242,9 @@ function LandingPage() {
           {screenshots.map((_, index) => (
             <button
               key={index}
-              onClick={() => setActiveScreenshot(index)} 
+              onClick={() => setActiveScreenshot(index)}
               className={`w-3 h-3 rounded-full ${
-                activeScreenshot === index ? 'bg-light-blue-700' : 'bg-gray-300'
+                activeScreenshot === index ? "bg-light-blue-700" : "bg-gray-300"
               }`}
             />
           ))}
@@ -251,7 +265,10 @@ function LandingPage() {
         © 2025 InkNote. Empowering Your Creativity.
       </footer>
       <b>
-        <a href="/terms" className="text-blue-500 hover:text-blue-700 m-4 cursor-pointer  x">
+        <a
+          href="/terms"
+          className="text-blue-500 hover:text-blue-700 m-4 cursor-pointer  x"
+        >
           Terms and conditions apply.
         </a>
       </b>

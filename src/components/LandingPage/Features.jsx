@@ -3,43 +3,49 @@ import { DiOpensource } from "react-icons/di";
 import { MdOutlineKeyboardBackspace } from "react-icons/md";
 const features = [
   {
-    icon: <Pencil size={40} className="text-light-purple-500" />, 
+    icon: <Pencil size={40} className="text-light-purple-500" />,
     title: "Easy Note-Taking",
-    description: "Create, edit, and format notes effortlessly with our intuitive editor.",
+    description:
+      "Create, edit, and format notes effortlessly with our intuitive editor.",
   },
   {
-    icon: <Cloud size={40} className="text-light-blue-500" />, 
+    icon: <Cloud size={40} className="text-light-blue-500" />,
     title: "Cloud Sync",
-    description: "Access your notes from anywhere with real-time cloud synchronization.",
+    description:
+      "Access your notes from anywhere with real-time cloud synchronization.",
   },
   {
-    icon: <Lock size={40} className="text-light-coral-500" />, 
+    icon: <Lock size={40} className="text-light-coral-500" />,
     title: "Secure & Private",
-    description: "Your notes are encrypted and protected to ensure your privacy.",
+    description:
+      "Your notes are encrypted and protected to ensure your privacy.",
   },
   {
-    icon: <Layers size={40} className="text-light-green-500" />, 
+    icon: <Layers size={40} className="text-light-green-500" />,
     title: "Organized Structure",
     description: "Keep your notes neatly structured with folders and tags.",
   },
   {
-    icon: <CheckCircle size={40} className="text-light-amber-500" />, 
+    icon: <CheckCircle size={40} className="text-light-amber-500" />,
     title: "Task Integration",
     description: "Manage to-dos and set reminders within your notes.",
   },
   {
-    icon: <DiOpensource size={40} className="text-light-purple-500" />, 
+    icon: <DiOpensource size={40} className="text-light-purple-500" />,
     title: "Open Source",
-    description: "Built on open-source technologies to ensure transparency and security.",
-
-  }
+    description:
+      "Built on open-source technologies to ensure transparency and security.",
+  },
 ];
 
 function Features() {
   return (
     <section className="bg-gradient-to-br from-light-blue-100 to-light-purple-200 dark:from-dark-700 dark:to-dark-900 min-h-screen py-20 px-6 sm:px-12 text-center">
       <h1 className="relative group">
-        <a href="/" className="fixed top-0 left-0 mt-4 ml-4 flex flex-col items-center">
+        <a
+          href="/"
+          className="fixed top-0 left-0 mt-4 ml-4 flex flex-col items-center"
+        >
           <MdOutlineKeyboardBackspace className="w-12 h-12 text-light-coral-500 dark:text-light-blue-500" />
           <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-light-coral-500 dark:text-light-blue-500 bg-light-blue-600 dark:bg-light-coral-800 font-semibold px-2 py-1 rounded-full text-sm">
             Go back

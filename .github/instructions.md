@@ -1,22 +1,26 @@
 ---
-applyTo: '**'
+applyTo: "**"
 ---
+
 Coding standards, domain knowledge, and preferences that AI should follow.
 Always code in full blocks, and avoid using inline code.
 Use pnpm for package management.
 Use JavaScipt for this project.
 All Api keys, tokens, and secrets should be stored in a .env file.
 When asked to create a github commit message, use the following format:
+
 ```
 <type>(<scope>): <subject>
 <body>
 ```
+
 Where:
+
 - `<type>`: The type of change that is being made (e.g., feat, fix, chore, docs, style, refactor, perf, test).
 - `<scope>`: The scope of the change (e.g., component name, module name).
 - `<subject>`: A short description of the change (max 72 characters).
 - `<body>`: A longer description of the change, if necessary (max 72 characters per line).
-Use the following commit message types:
+  Use the following commit message types:
 - feat: A new feature
 - fix: A bug fix
 - chore: Changes to the build process or auxiliary tools and libraries such as documentation generation
@@ -37,4 +41,3 @@ Use the following commit message types:
 - downgrade: A commit that downgrades a dependency
 - hotfix: A commit that fixes a critical issue in production
 - patch: A commit that fixes a bug in a release
-

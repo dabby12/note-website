@@ -13,35 +13,39 @@ This is a Vite + React project that includes various features such as user authe
 ## Installation
 
 1. Clone the repository:
-    ```sh
-    git clone https://github.com/dabby12/note-website
-    cd vite-project
-    ```
+
+   ```sh
+   git clone https://github.com/dabby12/note-website
+   cd vite-project
+   ```
 
 2. Install dependencies (using pnpm):
-    ```sh
-    pnpm install
-    ```
+
+   ```sh
+   pnpm install
+   ```
 
 3. Create a `.env` file in the root directory and add your Appwrite project details:
-    ```env
-    VITE_APPWRITE_ENDPOINT=
-    VITE_APPWRITE_PROJECT_ID=
-    VITE_APPWRITE_DATABASE_ID=
-    VITE_APPWRITE_COLLECTION_ID=
-    VITE_APPWRITE_PREF_COLLECTION_ID=
-    VITE_APPWRITE_PROFILE_PICTURE_BUCKET_ID=
+
+   ```env
+   VITE_APPWRITE_ENDPOINT=
+   VITE_APPWRITE_PROJECT_ID=
+   VITE_APPWRITE_DATABASE_ID=
+   VITE_APPWRITE_COLLECTION_ID=
+   VITE_APPWRITE_PREF_COLLECTION_ID=
+   VITE_APPWRITE_PROFILE_PICTURE_BUCKET_ID=
 
 
-    ```
+   ```
 
 4. Start the development server:
-    ```sh
-    pnpm run dev
-    ```
+   ```sh
+   pnpm run dev
+   ```
+
 ```
 5. Create a schema in Appwrite for the following
-    5a. Database: 
+    5a. Database:
         Create 2 collections named preferences and notes
     5b. preferences collection schema:
         TimeActivatedTrial: datetime
@@ -57,12 +61,14 @@ This is a Vite + React project that includes various features such as user authe
         Date: datetime
         userid:
 ```
+
 ## Scripts
 
 - `npm run dev`: Starts the development server.
 - `npm run build`: Builds the project for production.
 - `npm run lint`: Runs ESLint to check for linting errors.
 - `npm run preview`: Previews the production build.
+
 ## Dependencies
 
 - **React**: A JavaScript library for building user interfaces.
@@ -80,4 +86,3 @@ This is a Vite + React project that includes various features such as user authe
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
-

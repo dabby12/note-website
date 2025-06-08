@@ -2,8 +2,13 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { account, databases } from "../api/appwrite.config.js";
 import { Query } from "appwrite";
-import { ToastContainer, toast } from 'react-toastify';
-import { Menu, MenuHandler, MenuList, MenuItem } from "@material-tailwind/react";
+import { ToastContainer, toast } from "react-toastify";
+import {
+  Menu,
+  MenuHandler,
+  MenuList,
+  MenuItem,
+} from "@material-tailwind/react";
 
 // Icons
 import { MdEdit, MdDelete } from "react-icons/md";
@@ -13,8 +18,7 @@ import { IoSettings } from "react-icons/io5";
 import { GrLogout } from "react-icons/gr";
 
 // Assets
-import miku from "../assets/miku.jpg"
-
+import miku from "../assets/miku.jpg";
 
 // Environment variables
 const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID;
@@ -30,7 +34,7 @@ function Dashboard() {
   const [prefsId, setPrefsId] = useState(null);
   const [plan, setPlan] = useState(null);
   const [date, setDate] = useState("");
-  
+
   const navigate = useNavigate();
 
   // Trial activation notification
@@ -47,7 +51,7 @@ function Dashboard() {
     try {
       const userData = await account.get();
       setUser(userData);
-      localStorage.setItem('user', JSON.stringify(userData));
+      localStorage.setItem("user", JSON.stringify(userData));
       return userData;
     } catch (error) {
       console.error("Error fetching user data:", error);
@@ -60,10 +64,10 @@ function Dashboard() {
     const checkUser = async () => {
       try {
         const userData = await getUserData();
-        if (!localStorage.getItem('loggedIn')) {
+        if (!localStorage.getItem("loggedIn")) {
           if (userData) {
             toast.success(`Welcome, ${userData.name}`);
-            localStorage.setItem('loggedIn', 'true');
+            localStorage.setItem("loggedIn", "true");
           } else {
             navigate("/");
           }
@@ -80,16 +84,18 @@ function Dashboard() {
   useEffect(() => {
     const fetchDocuments = async () => {
       if (!user) return;
-      
+
       try {
-        const response = await databases.listDocuments(DATABASE_ID, COLLECTION_ID, [
-          Query.equal("userID", [user.$id]),
-        ]);
+        const response = await databases.listDocuments(
+          DATABASE_ID,
+          COLLECTION_ID,
+          [Query.equal("userID", [user.$id])],
+        );
         setDocuments(response.documents);
         if (response.documents.length > 0) {
           setDate(response.documents[0].Date); // Store the first document's date
         }
-        
+
         console.log(response.documents);
       } catch (error) {
         console.error("Error fetching documents:", error);
@@ -102,13 +108,13 @@ function Dashboard() {
   // Create user preferences (ensures only one exists)
   const createPrefs = async () => {
     if (!user) return;
-    
+
     try {
       // First check if any preferences exist
       const existingPrefs = await databases.listDocuments(
         DATABASE_ID,
         PREF_COLLECTION_ID,
-        [Query.equal("userid", user.$id)]
+        [Query.equal("userid", user.$id)],
       );
 
       // If no preferences exist, create one
@@ -117,7 +123,7 @@ function Dashboard() {
         await databases.createDocument(
           DATABASE_ID,
           PREF_COLLECTION_ID,
-          'unique()',
+          "unique()",
           {
             theme: "light",
             notifications: true,
@@ -126,26 +132,26 @@ function Dashboard() {
             TimeActivatedTrial: date,
             plan: "free",
             custom_theme: false,
-          }
+          },
         );
-        localStorage.setItem('prefsCreated', 'true');
+        localStorage.setItem("prefsCreated", "true");
       }
       // If multiple preferences exist, delete extras
       else if (existingPrefs.documents.length > 1) {
         // Keep the first one and delete the rest
         const prefsToKeep = existingPrefs.documents[0];
-        
+
         for (let i = 1; i < existingPrefs.documents.length; i++) {
           await databases.deleteDocument(
             DATABASE_ID,
             PREF_COLLECTION_ID,
-            existingPrefs.documents[i].$id
+            existingPrefs.documents[i].$id,
           );
         }
-        
+
         setPreferences([prefsToKeep]);
         setPrefsId(prefsToKeep.$id);
-        localStorage.setItem('prefsId', prefsToKeep.$id);
+        localStorage.setItem("prefsId", prefsToKeep.$id);
         setPlan(prefsToKeep.plan);
       }
     } catch (error) {
@@ -162,27 +168,27 @@ function Dashboard() {
         createPrefs();
         return;
       }
-  
+
       // Get the document by ID (remove Query.equal since it's not supported in getDocument)
       const prefsResponse = await databases.getDocument(
         DATABASE_ID,
         PREF_COLLECTION_ID,
-        prefsID
-      ); 
-        console.log(prefsResponse)
-  
+        prefsID,
+      );
+      console.log(prefsResponse);
+
       if (!prefsResponse) {
         console.error("No preferences found");
         createPrefs();
         return;
       }
-  
+
       setPreferences(prefsResponse);
       console.log(prefsResponse);
     } catch (error) {
       console.warn("Error fetching preferences:", error);
     }
-  }; 
+  };
 
   useEffect(() => {
     fetchPrefs();
@@ -190,12 +196,12 @@ function Dashboard() {
   // Verify user authentication from localStorage
   const verifyLocalStorage = () => {
     try {
-      const loggedIn = localStorage.getItem('loggedIn');
-      const userData = JSON.parse(localStorage.getItem('user'));
-      
+      const loggedIn = localStorage.getItem("loggedIn");
+      const userData = JSON.parse(localStorage.getItem("user"));
+
       if (!(userData?.email && loggedIn)) {
         navigate("/");
-        localStorage.removeItem('loggedIn');
+        localStorage.removeItem("loggedIn");
       }
     } catch (error) {
       console.error("Error checking local storage:", error);
@@ -203,19 +209,19 @@ function Dashboard() {
     }
   };
 
-  useEffect(() => { 
-    verifyLocalStorage(); 
+  useEffect(() => {
+    verifyLocalStorage();
   }, []);
 
   // UI handlers
   const handleLogout = async () => {
     await account.deleteSession("current");
-    localStorage.removeItem('loggedIn');
+    localStorage.removeItem("loggedIn");
     navigate("/");
   };
 
   const handleSettings = async () => {
-    const data = localStorage
+    const data = localStorage;
     if (data === null) {
       console.error("No data found in local storage");
       navigate("/");
@@ -228,13 +234,13 @@ function Dashboard() {
     setSelectedDocuments((prevSelected) =>
       prevSelected.includes(docId)
         ? prevSelected.filter((id) => id !== docId)
-        : [...prevSelected, docId]
+        : [...prevSelected, docId],
     );
   };
 
   const deleteDocument = async (docId) => {
     if (!confirm("Are you sure you want to delete this document?")) return;
-    
+
     try {
       await databases.deleteDocument(DATABASE_ID, COLLECTION_ID, docId);
       toast.success("Document deleted successfully");
@@ -247,7 +253,7 @@ function Dashboard() {
 
   const deleteMassDocuments = async () => {
     if (!confirm("Are you sure you want to delete these documents?")) return;
-    
+
     try {
       for (const docId of selectedDocuments) {
         await databases.deleteDocument(DATABASE_ID, COLLECTION_ID, docId);
@@ -262,14 +268,20 @@ function Dashboard() {
   };
 
   // Helper functions
-  // Format date is not used in the code, but can be useful for other purposes look at line 284 
+  // Format date is not used in the code, but can be useful for other purposes look at line 284
   const formatDate = (dateString) => {
-    const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+    const options = {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    };
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
   const renderContent = (content) => {
-    if (typeof content === 'string') {
+    if (typeof content === "string") {
       try {
         const parsedContent = JSON.parse(content);
         return parsedContent.map((block, index) => (
@@ -283,26 +295,30 @@ function Dashboard() {
   };
   const formatDateForNote = (date) => {
     if (!date) return "Invalid date";
-  
+
     try {
       const parsedDate = new Date(date);
       return parsedDate.toLocaleString(undefined, {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
       });
     } catch (error) {
-      console.error(  "Invalid date format:", date);
+      console.error("Invalid date format:", date);
       return "Invalid date";
     }
   };
   formatDateForNote(date);
   return (
     <div className="flex flex-col items-center h-screen bg-light-blue-50">
-      <h1 className="text-3xl font-bold mt-4 animate-fade-in text-light-blue-800 font-handwriting">Welcome, {user?.name}!</h1>
-      <h2 className="text-xl font-semibold mt-6 animate-fade-in">Your notes:</h2>
+      <h1 className="text-3xl font-bold mt-4 animate-fade-in text-light-blue-800 font-handwriting">
+        Welcome, {user?.name}!
+      </h1>
+      <h2 className="text-xl font-semibold mt-6 animate-fade-in">
+        Your notes:
+      </h2>
 
       <div className="flex flex-row items-start justify-center flex-grow flex-wrap">
         <ul className="mt-4 px-2 flex flex-row flex-wrap rounded-lg">
@@ -325,8 +341,9 @@ function Dashboard() {
                   <li className="p-2 border-b m-2 font-bold">{doc.Name}</li>
                   <li className="p-2 border-b rounded-md">{doc.Description}</li>
                   <li className="p-2 border-b">{renderContent(doc.Content)}</li>
-                  <li className="p-2 border-b">{formatDateForNote(doc.Date)}</li>
-
+                  <li className="p-2 border-b">
+                    {formatDateForNote(doc.Date)}
+                  </li>
 
                   {doc.tags && doc.tags.length > 0 && (
                     <div className="p-2 border-b">
@@ -362,7 +379,10 @@ function Dashboard() {
         </ul>
       </div>
 
-      <a className="fixed bottom-4 right-4 bg-blue-500 p-3 rounded-full shadow-lg text-white hover:bg-blue-600 transition transform hover:scale-110" href="/new">
+      <a
+        className="fixed bottom-4 right-4 bg-blue-500 p-3 rounded-full shadow-lg text-white hover:bg-blue-600 transition transform hover:scale-110"
+        href="/new"
+      >
         <FaPen className="text-2xl" />
       </a>
 
@@ -393,10 +413,16 @@ function Dashboard() {
           />
         </MenuHandler>
         <MenuList className="text-sm">
-          <MenuItem className="hover:text-red-500 flex items-center mb-0.5" onClick={handleLogout}>
+          <MenuItem
+            className="hover:text-red-500 flex items-center mb-0.5"
+            onClick={handleLogout}
+          >
             <GrLogout className="mr-2" /> Logout
           </MenuItem>
-          <MenuItem className="hover:text-blue-500 flex items-center" onClick={handleSettings}>
+          <MenuItem
+            className="hover:text-blue-500 flex items-center"
+            onClick={handleSettings}
+          >
             <IoSettings className="mr-2" /> Settings
           </MenuItem>
         </MenuList>
