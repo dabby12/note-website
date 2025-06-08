@@ -16,6 +16,12 @@ export default defineConfig({
   }), sentryVitePlugin({
     org: "make-aguess",
     project: "javascript-react"
+  }), sentryVitePlugin({
+    org: "make-aguess",
+    project: "javascript-react"
+  }), sentryVitePlugin({
+    org: "make-aguess",
+    project: "javascript-react"
   })],
 
   build: {

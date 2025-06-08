@@ -59,6 +59,8 @@ function App() {
 
         {/* Payment */}
         <Route path="/payment" element={<Payment />} />
+
+        {/* Temp */}
       </Routes>
     </Router>
   );

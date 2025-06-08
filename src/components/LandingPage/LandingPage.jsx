@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { BookOpenIcon, FolderIcon, CheckCircleIcon } from 'lucide-react';
 import { FaRegLightbulb } from 'react-icons/fa';
-
+import { createTimeline } from 'animejs';
 // App Screenshots (Replace with your actual image imports)
 import AppScreenShot1 from '../../assets/app-screenshot1.png';
 import AppScreenShot2 from '../../assets/app-screenshot2.png';
@@ -65,7 +65,13 @@ const Typewriter = ({ speed = 100 }) => {
 function LandingPage() {
   const [activeScreenshot, setActiveScreenshot] = useState(0);
   const screenshots = [AppScreenShot1, AppScreenShot2, AppScreenShot3];
-
+  const tl = createTimeline({ defaults: { duration: 750 } })
+  useEffect(() => {
+  tl.label('start')
+    .add(".header_text", { x: '15rem'}, 500)  
+  }, [tl]);
+   
+    
   const features = [
     {
       icon: <BookOpenIcon className="w-12 h-12 text-light-blue-600" />,
@@ -106,6 +112,9 @@ function LandingPage() {
   const screenshotRef = useRef(null);
   const featuresInView = useInView(featuresRef, { once: true, amount: 0.2 });
   const screenshotInView = useInView(screenshotRef, { once: true, amount: 0.2 });
+  // Logo
+ 
+  // Animejs stuff
   return (
     <div className="flex flex-col items-center min-h-screen bg-gradient-to-b from-light-blue-200 via-neutral-100 to-light-green-100 text-black px-6">
       {/* Navigation Bar */}
@@ -155,7 +164,7 @@ function LandingPage() {
         <h1 className="text-6xl font-extrabold text-light-blue-800 leading-tight mb-4">
           <Typewriter speed={100} />
         </h1>
-        <p className="text-2xl text-gray-600 mb-8 font-dancing_script ">
+        <p className="text-2xl text-gray-600 mb-8 font-dancing_script">
           Transform how you capture, organize, and recall your ideas with InkNote's intelligent
           note-taking platform.
         </p>

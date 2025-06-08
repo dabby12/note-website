@@ -168,7 +168,8 @@ function Dashboard() {
         DATABASE_ID,
         PREF_COLLECTION_ID,
         prefsID
-      );
+      ); 
+        console.log(prefsResponse)
   
       if (!prefsResponse) {
         console.error("No preferences found");
@@ -182,7 +183,7 @@ function Dashboard() {
       console.warn("Error fetching preferences:", error);
     }
   }; 
-  
+
   useEffect(() => {
     fetchPrefs();
   }, [user]);
@@ -261,7 +262,7 @@ function Dashboard() {
   };
 
   // Helper functions
-  // Format date is not used in the code, but can be useful for other purposes
+  // Format date is not used in the code, but can be useful for other purposes look at line 284 
   const formatDate = (dateString) => {
     const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
     return new Date(dateString).toLocaleDateString(undefined, options);
@@ -297,7 +298,6 @@ function Dashboard() {
       return "Invalid date";
     }
   };
-  
   formatDateForNote(date);
   return (
     <div className="flex flex-col items-center h-screen bg-light-blue-50">

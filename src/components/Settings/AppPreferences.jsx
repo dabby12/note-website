@@ -3,7 +3,7 @@ import { databases, account } from "../../api/appwrite.config.js";
 import { Query, ID } from "appwrite";
 import { toast } from "react-toastify";
 import { MdKeyboardBackspace } from "react-icons/md";
-import { GrSave } from "react-icons/gr"; 
+import { GrSave } from "react-icons/gr";
 import Sidebar from "../Special/Sidebar";
 
 function AppPreferences() {
@@ -17,6 +17,7 @@ function AppPreferences() {
 
   const handleBack = () => window.history.back();
 
+  // Fetch user data once on mount
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -27,62 +28,88 @@ function AppPreferences() {
         toast.error("Failed to fetch user data.");
       }
     };
+
     fetchUserData();
   }, []);
-const fetchPreferences = async () => {
-  const response = await databases.listDocuments(
-    DATABASE_ID,
-    PREFS_COLLECTION_ID,
-    [Query.equal("user_id", userData.$id)]
-  );
 
-  if (response.documents.length > 0) {
-    setPreferences(response.documents);
-    setPrefsId(response.documents[0].$id);
-    setSeasonTheme(response.documents[0].season_theme || false);
-  } else {
-    console.log("No preferences found for this user.");
-  }
-  return response.documents;
-}
-
-const createPrefs = async () => {
-  try {
-    const newPrefs = await databases.createDocument(
+  // Fetch preferences for user
+  const fetchPreferences = async () => {
+    const response = await databases.listDocuments(
       DATABASE_ID,
       PREFS_COLLECTION_ID,
-      ID.unique(),
-      {
-        user_id: userData.$id,
-        theme: "light",
-        notifications: true,
-        season_theme: false,
-      }
+      [Query.equal("userid", userData.$id)]
     );
-    setPreferences([newPrefs]);
-    setPrefsId(newPrefs.$id);
-    setSeasonTheme(false);
-    toast.success("Preferences created successfully!");
-  } catch (error) {
-    console.error("Error creating preferences:", error);
-    toast.error("Failed to create preferences.");
-  }
-}
 
-useEffect(() => {
-  const checkPrefs = async () => {
-    const prefs = await fetchPreferences();
-    if (prefs.length === 0) {
-      console.log("No prefs found, creating new prefs");
-      await createPrefs();
+    if (response.documents.length > 0) {
+      setPreferences(response.documents);
+      setPrefsId(response.documents[0].$id);
+      setSeasonTheme(response.documents[0].season_theme || false);
+    } else {
+      console.log("No preferences found for this user.");
+    }
+
+    return response.documents;
+  };
+
+  const createPrefs = async () => {
+    try {
+      const newPrefs = await databases.createDocument(
+        DATABASE_ID,
+        PREFS_COLLECTION_ID,
+        ID.unique(),
+        {
+          userid: userData.$id,
+          theme: "light",
+          notifications: true,
+          season_theme: false,
+          usedFreeTrial: true,
+          TimeActivatedTrial: new Date().toISOString(),
+          plan: "free",
+        }
+      );
+      setPreferences([newPrefs]);
+      setPrefsId(newPrefs.$id);
+      setSeasonTheme(false);
+      toast.success("Preferences created successfully!");
+    } catch (error) {
+      console.error("Error creating preferences:", error);
+      toast.error("Failed to create preferences.");
     }
   };
 
-  if (userData) {
-    checkPrefs();
-  }
-}, [userData]);x``
-// steps to rewrite fetchPreferences and createPrefs
+  // Delete all but the first preferences document
+  const checkPrefsx2 = async (prefs) => {
+    try {
+      const extras = prefs.slice(1);
+      for (const pref of extras) {
+        await databases.deleteDocument(DATABASE_ID, PREFS_COLLECTION_ID, pref.$id);
+        console.log("Deleted extra preferences document:", pref.$id);
+      }
+    } catch (error) {
+      console.error("Error checking preferences:", error);
+    }
+  };
+
+  // Initialize preferences once userData is available
+  useEffect(() => {
+    const initPrefsForUser = async () => {
+      if (!userData || !userData.$id) return;
+
+      try {
+        const prefs = await fetchPreferences();
+
+        if (prefs.length === 0) {
+          await createPrefs();
+        } else if (prefs.length > 1) {
+          await checkPrefsx2(prefs);
+        }
+      } catch (error) {
+        console.error("Error initializing preferences:", error);
+      }
+    };
+
+    initPrefsForUser();
+  }, [userData]);
 
   const handleUpdate = async (id, field, value) => {
     try {
@@ -141,12 +168,10 @@ useEffect(() => {
 
   return (
     <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Sidebar fixed width */}
       <div className="w-64">
         <Sidebar />
       </div>
 
-      {/* Main content fills remaining space */}
       <main className="flex-1 p-8 overflow-auto">
         <div className="flex justify-between items-center mb-12">
           <button
@@ -183,18 +208,13 @@ useEffect(() => {
           >
             {/* Theme */}
             <div>
-              <label
-                htmlFor="theme"
-                className="block text-lg font-medium text-gray-700 dark:text-gray-300 mb-2"
-              >
+              <label htmlFor="theme" className="block text-lg font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Theme
               </label>
               <select
                 id="theme"
                 value={preferences[0].theme || "light"}
-                onChange={(e) =>
-                  handleUpdate(preferences[0].$id, "theme", e.target.value)
-                }
+                onChange={(e) => handleUpdate(preferences[0].$id, "theme", e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="light">Light</option>
@@ -204,18 +224,13 @@ useEffect(() => {
 
             {/* Notifications */}
             <div>
-              <label
-                htmlFor="notifications"
-                className="block text-lg font-medium text-gray-700 dark:text-gray-300 mb-2"
-              >
+              <label htmlFor="notifications" className="block text-lg font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Notifications
               </label>
               <select
                 id="notifications"
                 value={preferences[0].notifications ? "true" : "false"}
-                onChange={(e) =>
-                  handleUpdate(preferences[0].$id, "notifications", e.target.value)
-                }
+                onChange={(e) => handleUpdate(preferences[0].$id, "notifications", e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="true">On</option>
@@ -225,18 +240,13 @@ useEffect(() => {
 
             {/* Season Theme */}
             <div>
-              <label
-                htmlFor="seasonTheme"
-                className="block text-lg font-medium text-gray-700 dark:text-gray-300 mb-2"
-              >
+              <label htmlFor="seasonTheme" className="block text-lg font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Season Theme
               </label>
               <select
                 id="seasonTheme"
                 value={seasonTheme ? "true" : "false"}
-                onChange={(e) =>
-                  handleUpdate(preferences[0].$id, "season_theme", e.target.value)
-                }
+                onChange={(e) => handleUpdate(preferences[0].$id, "season_theme", e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="true">On</option>
@@ -245,9 +255,7 @@ useEffect(() => {
             </div>
           </form>
         ) : (
-          <p className="text-center text-gray-500 dark:text-gray-300 text-lg">
-            No preferences found.
-          </p>
+          <p className="text-center text-gray-500 dark:text-gray-300 text-lg">No preferences found.</p>
         )}
       </main>
     </div>
